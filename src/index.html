@@ -222,10 +222,11 @@ const SHIPS = [
 const AVATARS = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#64748b'];
 
 // ── Runtime globals ───────────────────────────────────────────────────────────
-const CONTEXT = window.__CONTEXT_URL  ?? '';
-const DB_URL  = window.__DB_URL       ?? '';
-const APP_ID  = window.__APP_ID       ?? 'sea-battle';
-const ME      = window.__CURRENT_MEMBER ?? null;
+const CONTEXT     = window.__CONTEXT_URL    ?? '';
+const DB_URL      = window.__DB_URL         ?? '';
+const EVENTS_URL  = window.__EVENTS_URL     ?? '/api/events';
+const APP_ID      = window.__APP_ID         ?? 'sea-battle';
+const ME          = window.__CURRENT_MEMBER ?? null;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let members       = [];
@@ -291,6 +292,28 @@ async function db(sql, params = []) {
     body: JSON.stringify({ sql, params }),
   });
   return res.json();
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+function publishGameResult(game) {
+  const loserId   = game.challenger_id === game.winner_id ? game.opponent_id   : game.challenger_id;
+  const loserName = game.challenger_id === game.winner_id ? game.opponent_name : game.challenger_name;
+  fetch(EVENTS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      source_app_id: APP_ID,
+      type: 'sea-battle.game-completed',
+      subject_id: game.winner_id,
+      payload: {
+        winnerId:   game.winner_id,
+        winnerName: game.winner_name,
+        loserId,
+        loserName,
+        resigned: !!game.resigned_by_id,
+      },
+    }),
+  }).catch(() => {});
 }
 
 // ── Notify ────────────────────────────────────────────────────────────────────
@@ -486,6 +509,7 @@ async function fireAt(gameId, row, col) {
   }
 
   await loadGameDetail(gameId);
+  if (won) publishGameResult(currentGame);
   render();
   maybeStartPolling(gameId);
 }
@@ -537,6 +561,7 @@ window.confirmResign = async function(gameId) {
   notify('🏳️ Victory by Resignation', `${me.name} resigned. You win!`, oppId, gameId);
   stopPolling();
   await loadGameDetail(gameId);
+  publishGameResult(currentGame);
   render();
 };
 
