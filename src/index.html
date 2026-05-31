@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/run/sea-battle/" />
+  <title>Sea Battle</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      var(--hub-bg,          #f0f4f8);
+      --surface: var(--hub-surface,     #ffffff);
+      --border:  var(--hub-border,      #d1dde8);
+      --text:    var(--hub-text,        #0f172a);
+      --muted:   var(--hub-text-muted,  #64748b);
+      --accent:  var(--hub-primary,     #1e3a5f);
+      --accent-h:var(--hub-primary-hover,#2d5282);
+      --accent-fg:var(--hub-primary-fg, #ffffff);
+      --radius:  var(--hub-radius,      10px);
+      --font:    var(--hub-font,        -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+
+      --ocean:      #bfdbf7;
+      --ocean-line: #93c5fd;
+      --ship-bg:    #334155;
+      --ship-bd:    #1e293b;
+      --hit-bg:     #dc2626;
+      --hit-bd:     #b91c1c;
+      --miss-bg:    #f8fafc;
+      --miss-bd:    #cbd5e1;
+      --sunk-bg:    #7f1d1d;
+      --sunk-bd:    #991b1b;
+      --reveal-bg:  #475569;
+      --place-ok:   rgba(34, 197, 94, 0.45);
+      --place-bad:  rgba(239, 68, 68, 0.45);
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    #app { max-width: 700px; margin: 0 auto; padding: 16px; }
+
+    /* ── Header ── */
+    .hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .hdr h1 { font-size: 1.35rem; font-weight: 700; }
+    .hdr .sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Buttons ── */
+    .btn { border: none; border-radius: var(--radius); padding: 8px 16px; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+    .btn-primary  { background: var(--accent); color: var(--accent-fg); }
+    .btn-primary:hover  { background: var(--accent-h); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+
+    /* ── Game list cards ── */
+    .game-card {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .game-card:hover { border-color: var(--accent); }
+    .game-card.urgent { border-left: 3px solid var(--accent); }
+    .game-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+    .game-card .st { font-size: 0.8rem; color: var(--muted); }
+    .game-card .st.my { color: var(--accent); font-weight: 700; }
+
+    /* ── Section labels ── */
+    .sec { font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+           letter-spacing: 0.06em; color: var(--muted); margin: 18px 0 6px; }
+
+    /* ── Grid ── */
+    .grid-wrap { display: flex; flex-direction: column; align-items: flex-start; }
+    .grid-col-row { display: flex; margin-left: 26px; }
+    .gcl { width: 30px; height: 18px; display: flex; align-items: center;
+           justify-content: center; font-size: 0.68rem; color: var(--muted); font-weight: 600; }
+    .grid-row { display: flex; align-items: center; }
+    .grl { width: 26px; height: 30px; display: flex; align-items: center;
+           justify-content: center; font-size: 0.68rem; color: var(--muted); font-weight: 600; }
+    .gc {
+      width: 30px; height: 30px;
+      border-right: 1px solid var(--ocean-line); border-bottom: 1px solid var(--ocean-line);
+      background: var(--ocean);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; cursor: default;
+    }
+    .grid-row:first-of-type .gc { border-top: 1px solid var(--ocean-line); }
+    .gc:first-of-type { border-left: 1px solid var(--ocean-line); }
+    .gc.ship  { background: var(--ship-bg); border-color: var(--ship-bd); }
+    .gc.hit   { background: var(--hit-bg);  border-color: var(--hit-bd); }
+    .gc.hit::after   { content: '✕'; color: #fff; font-size: 13px; font-weight: 700; }
+    .gc.miss  { background: var(--miss-bg); border-color: var(--miss-bd); }
+    .gc.miss::after  { content: '·'; color: var(--muted); font-size: 22px; line-height: 1; }
+    .gc.sunk  { background: var(--sunk-bg); border-color: var(--sunk-bd); }
+    .gc.sunk::after  { content: '✕'; color: #fca5a5; font-size: 13px; font-weight: 700; }
+    .gc.reveal { background: var(--reveal-bg); border-color: #334155; opacity: 0.65; }
+    .gc.shootable { cursor: crosshair; }
+    .gc.shootable:hover { background: #7dd3fc; }
+    .gc.pok   { background: var(--place-ok);  cursor: crosshair; }
+    .gc.pbad  { background: var(--place-bad); cursor: not-allowed; }
+
+    @media (min-width: 560px) {
+      .gcl { width: 34px; }
+      .grl { height: 34px; }
+      .gc  { width: 34px; height: 34px; }
+    }
+
+    /* ── Two-panel game layout ── */
+    .panels { display: flex; flex-direction: column; gap: 20px; }
+    .panel-title {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--muted); margin-bottom: 8px;
+    }
+    @media (min-width: 560px) { .panels { flex-direction: row; } }
+
+    /* ── Status bar ── */
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 14px; margin-bottom: 14px;
+      font-size: 0.875rem;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
+    }
+    .badge.my   { background: var(--accent); color: var(--accent-fg); }
+    .badge.wait { background: var(--border);  color: var(--muted); }
+
+    /* ── Last shot result ── */
+    .shot-result {
+      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+      border-radius: var(--radius); font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;
+    }
+    .shot-result.hit  { background: #fee2e2; color: #991b1b; }
+    .shot-result.miss { background: #f1f5f9; color: var(--muted); }
+    .shot-result.sunk { background: #450a0a; color: #fca5a5; }
+
+    /* ── Setup: ship palette ── */
+    .palette { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .ship-opt {
+      display: flex; align-items: center; gap: 6px; padding: 7px 11px;
+      border: 2px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); font-size: 0.8rem;
+    }
+    .ship-opt.next  { border-color: var(--accent); background: #eff6ff; font-weight: 700; }
+    .ship-opt.done  { opacity: 0.4; border-style: dashed; }
+    .sblocks { display: flex; gap: 2px; }
+    .sblock  { width: 10px; height: 10px; background: var(--ship-bg); border-radius: 2px; }
+
+    /* ── Setup controls ── */
+    .setup-ctrl { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+
+    /* ── Modal ── */
+    .modal-bd {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px;
+    }
+    .modal {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 24px; width: 100%; max-width: 420px; max-height: 80vh; overflow-y: auto;
+    }
+    .modal h2 { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+
+    /* ── Member picker ── */
+    .member-list { display: flex; flex-direction: column; gap: 6px; }
+    .member-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer;
+    }
+    .member-item:hover { border-color: var(--accent); }
+    .member-item.sel   { border-color: var(--accent); background: #eff6ff; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0;
+    }
+
+    /* ── Win / defeat banner ── */
+    .banner {
+      text-align: center; padding: 22px; border-radius: var(--radius); margin-bottom: 18px; color: #fff;
+    }
+    .banner.win  { background: linear-gradient(135deg, #1e3a5f 0%, #2d5282 100%); }
+    .banner.lose { background: linear-gradient(135deg, #374151 0%, #1f2937 100%); }
+    .banner h2   { font-size: 1.4rem; margin-bottom: 6px; }
+    .banner p    { opacity: 0.85; font-size: 0.9rem; }
+
+    /* ── Empty state ── */
+    .empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+    .empty .icon { font-size: 2.8rem; margin-bottom: 10px; }
+    .empty p { font-size: 0.9rem; }
+
+    /* ── Back button ── */
+    .back { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 0.85rem;
+            cursor: pointer; border: none; background: none; padding: 0 0 14px; }
+    .back:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--muted)">Loading…</div>
+</div>
+
+<script>
+// ── Constants ─────────────────────────────────────────────────────────────────
+const GRID  = 10;
+const COLS  = ['A','B','C','D','E','F','G','H','I','J'];
+const SHIPS = [
+  { type:'carrier',    size:5, label:'Carrier'    },
+  { type:'battleship', size:4, label:'Battleship' },
+  { type:'cruiser',    size:3, label:'Cruiser'    },
+  { type:'submarine',  size:3, label:'Submarine'  },
+  { type:'destroyer',  size:2, label:'Destroyer'  },
+];
+const AVATARS = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#64748b'];
+
+// ── Runtime globals ───────────────────────────────────────────────────────────
+const CONTEXT = window.__CONTEXT_URL  ?? '';
+const DB_URL  = window.__DB_URL       ?? '';
+const APP_ID  = window.__APP_ID       ?? 'sea-battle';
+const ME      = window.__CURRENT_MEMBER ?? null;
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let members       = [];
+let me            = ME ? { ...ME } : null;
+let games         = [];
+let currentGame   = null;
+let myShips       = [];
+let opponentShips = [];
+let myShots       = [];
+let opponentShots = [];
+let view          = 'loading';
+
+// Setup state
+let setupShips  = [];
+let horizontal  = true;
+let revealOpp   = false;
+
+// Modal
+let modalEl = null;
+let pendingOpponentId = null;
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function memberColor(id) {
+  let h = 0;
+  for (let i = 0; i < (id||'').length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return AVATARS[h % AVATARS.length];
+}
+function initial(name) { return (name||'?')[0].toUpperCase(); }
+function uid() { return crypto.randomUUID(); }
+
+// ── DB ────────────────────────────────────────────────────────────────────────
+async function db(sql, params = []) {
+  if (!DB_URL) return { rows:[] };
+  const res = await fetch(DB_URL, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ sql, params }),
+  });
+  return res.json();
+}
+
+// ── Notify ────────────────────────────────────────────────────────────────────
+function notify(title, body, audience, gameId) {
+  const url = gameId ? `/open/${APP_ID}?gameId=${gameId}` : `/run/${APP_ID}`;
+  fetch('/api/notifications/send', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ title, body, audience, url }),
+  }).catch(() => {});
+}
+
+// ── Game logic ────────────────────────────────────────────────────────────────
+function shipCells(row, col, size, horiz) {
+  const out = [];
+  for (let i = 0; i < size; i++)
+    out.push(horiz ? { row, col: col+i } : { row: row+i, col });
+  return out;
+}
+function inBounds(cells) {
+  return cells.every(c => c.row >= 0 && c.row < GRID && c.col >= 0 && c.col < GRID);
+}
+function overlaps(cells, ships) {
+  const occ = new Set();
+  for (const s of ships) {
+    for (const p of JSON.parse(s.positions)) occ.add(`${p.row},${p.col}`);
+  }
+  return cells.some(c => occ.has(`${c.row},${c.col}`));
+}
+function validPlace(row, col, size, horiz, placed) {
+  const cells = shipCells(row, col, size, horiz);
+  return inBounds(cells) && !overlaps(cells, placed);
+}
+function evalShot(row, col, ships, prior) {
+  for (const s of ships) {
+    const pos = JSON.parse(s.positions);
+    if (!pos.some(p => p.row===row && p.col===col)) continue;
+    const priorHits = new Set(
+      prior.filter(x => x.result==='hit'||x.result==='sunk').map(x=>`${x.target_row},${x.target_col}`)
+    );
+    const allHit = pos.every(p => (p.row===row && p.col===col) || priorHits.has(`${p.row},${p.col}`));
+    return allHit ? { result:'sunk', shipType:s.ship_type } : { result:'hit', shipType:null };
+  }
+  return { result:'miss', shipType:null };
+}
+function allSunk(ships, shots) {
+  const hits = new Set(shots.filter(s=>s.result==='hit'||s.result==='sunk').map(s=>`${s.target_row},${s.target_col}`));
+  return ships.every(s => JSON.parse(s.positions).every(p => hits.has(`${p.row},${p.col}`)));
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+async function loadMembers() {
+  if (!CONTEXT) {
+    members = [{ id:'demo-1', name:'Alice', role:'adult' }, { id:'demo-2', name:'Bob', role:'adult' }];
+    if (!me) me = members[0];
+    return;
+  }
+  try {
+    const res = await fetch(`${CONTEXT}?keys=family.members`);
+    members = ((await res.json())['family.members']) ?? [];
+    if (!me && members.length) me = members[0];
+  } catch { members = []; }
+}
+
+async function loadGames() {
+  if (!me) return;
+  const { rows } = await db(
+    'SELECT * FROM sea_battle_games WHERE (challenger_id = ? OR opponent_id = ?) ORDER BY updated_at DESC',
+    [me.id, me.id]
+  );
+  games = rows;
+}
+
+async function loadGameDetail(gameId) {
+  const { rows } = await db('SELECT * FROM sea_battle_games WHERE id = ?', [gameId]);
+  if (!rows.length) return;
+  currentGame = rows[0];
+  const g = currentGame;
+  const myId = me?.id;
+  const oppId = g.challenger_id === myId ? g.opponent_id : g.challenger_id;
+
+  const [myShipRows, oppShotRows, myShotRows] = await Promise.all([
+    db('SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, myId]),
+    db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, oppId]),
+    db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, myId]),
+  ]);
+  myShips      = myShipRows.rows;
+  opponentShots = oppShotRows.rows;
+  myShots      = myShotRows.rows;
+
+  if (g.status === 'complete') {
+    const { rows: oppRows } = await db(
+      'SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, oppId]
+    );
+    opponentShips = oppRows;
+  } else {
+    opponentShips = [];
+  }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+async function createGame(opponentId) {
+  const opp = members.find(m => m.id === opponentId);
+  if (!opp || !me) return;
+  const gameId = uid();
+  const now = new Date().toISOString();
+  await db(
+    `INSERT INTO sea_battle_games
+     (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 'pending_challenger', ?, ?, ?)`,
+    [gameId, me.id, me.name, opp.id, opp.name, me.id, now, now]
+  );
+  await loadGames();
+  closeModal();
+  await openGame(gameId);
+}
+
+async function placeFleet(gameId) {
+  if (!me || setupShips.length !== SHIPS.length) return;
+  const g = currentGame;
+  const isChallenger = g.challenger_id === me.id;
+  const now = new Date().toISOString();
+
+  for (const s of setupShips) {
+    await db(
+      'INSERT INTO sea_battle_ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)',
+      [uid(), gameId, me.id, s.type, s.size, JSON.stringify(s.positions)]
+    );
+  }
+
+  const newStatus   = isChallenger ? 'pending_opponent' : 'challenger_turn';
+  const nextTurnId  = isChallenger ? g.opponent_id : g.challenger_id;
+  await db(
+    'UPDATE sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
+    [newStatus, nextTurnId, now, gameId]
+  );
+
+  if (isChallenger) {
+    notify('⚓ Sea Battle Challenge!', `${me.name} challenged you! Place your fleet.`, g.opponent_id, gameId);
+  } else {
+    notify('🚢 Fleet Ready!', `${g.opponent_name} placed their fleet. Your move, ${g.challenger_name}!`, g.challenger_id, gameId);
+  }
+
+  await loadGameDetail(gameId);
+  render();
+}
+
+async function fireAt(gameId, row, col) {
+  if (!me) return;
+  const g = currentGame;
+  if (g.current_turn_id !== me.id) return;
+  if (myShots.some(s => s.target_row === row && s.target_col === col)) return;
+
+  const oppId = g.challenger_id === me.id ? g.opponent_id : g.challenger_id;
+  const { rows: oppShips } = await db(
+    'SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, oppId]
+  );
+  const { result, shipType } = evalShot(row, col, oppShips, myShots);
+  const now = new Date().toISOString();
+
+  await db(
+    'INSERT INTO sea_battle_shots (id, game_id, shooter_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [uid(), gameId, me.id, row, col, result, shipType ?? null, now]
+  );
+
+  const allShots = [...myShots, { target_row:row, target_col:col, result }];
+  const won = allSunk(oppShips, allShots);
+  const coord = `${COLS[col]}${row+1}`;
+
+  if (won) {
+    const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
+    await db(
+      'UPDATE sea_battle_games SET status = \'complete\', winner_id = ?, winner_name = ?, updated_at = ? WHERE id = ?',
+      [me.id, me.name, now, gameId]
+    );
+    notify('🏆 You Win!', `You sank ${oppName}'s last ship!`, me.id, gameId);
+    notify('💥 Game Over', `${me.name} sank your last ship. Better luck next time!`, oppId, gameId);
+  } else {
+    const nextStatus = g.challenger_id === me.id ? 'opponent_turn' : 'challenger_turn';
+    await db(
+      'UPDATE sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
+      [nextStatus, oppId, now, gameId]
+    );
+    const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
+    if (result === 'miss') {
+      notify('🌊 Miss!', `${me.name} shot ${coord} and missed. Your turn!`, oppId, gameId);
+    } else if (result === 'sunk') {
+      notify(`🔥 Sunk!`, `${me.name} sank your ${shipType}! Fire back!`, oppId, gameId);
+    } else {
+      notify('💥 Hit!', `${me.name} hit your ship at ${coord}! Fire back!`, oppId, gameId);
+    }
+  }
+
+  await loadGameDetail(gameId);
+  render();
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+async function openGame(gameId) {
+  revealOpp  = false;
+  setupShips = [];
+  horizontal = true;
+  await loadGameDetail(gameId);
+  view = 'game';
+  render();
+}
+
+function goHome() {
+  currentGame = null;
+  myShips = opponentShips = myShots = opponentShots = [];
+  setupShips = [];
+  view = 'home';
+  render();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openModal(html) {
+  closeModal();
+  modalEl = document.createElement('div');
+  modalEl.className = 'modal-bd';
+  modalEl.innerHTML = `<div class="modal">${html}</div>`;
+  modalEl.addEventListener('click', e => { if (e.target === modalEl) closeModal(); });
+  document.body.appendChild(modalEl);
+}
+function closeModal() { modalEl?.remove(); modalEl = null; }
+
+function openNewGame() {
+  const opts = members.filter(m => m.id !== me?.id);
+  if (!opts.length) {
+    openModal(`<h2>No opponents</h2><p style="color:var(--muted)">You need at least one other family member to play.</p><div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal()">Close</button></div>`);
+    return;
+  }
+  pendingOpponentId = null;
+  const items = opts.map(m => `
+    <div class="member-item" id="mi-${esc(m.id)}" onclick="selectOpp('${esc(m.id)}')">
+      <div class="avatar" style="background:${memberColor(m.id)}">${initial(m.name)}</div>
+      <span style="font-weight:600;font-size:0.9rem">${esc(m.name)}</span>
+    </div>`).join('');
+  openModal(`
+    <h2>⚓ New Game</h2>
+    <p style="font-size:0.83rem;color:var(--muted);margin-bottom:12px">Challenge a family member</p>
+    <div class="member-list">${items}</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="chal-btn" disabled onclick="submitChallenge()">Challenge</button>
+    </div>`);
+}
+
+window.selectOpp = function(id) {
+  pendingOpponentId = id;
+  document.querySelectorAll('.member-item').forEach(el => el.classList.remove('sel'));
+  document.getElementById(`mi-${id}`)?.classList.add('sel');
+  const btn = document.getElementById('chal-btn');
+  if (btn) btn.disabled = false;
+};
+
+window.submitChallenge = async function() {
+  if (!pendingOpponentId) return;
+  const btn = document.getElementById('chal-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+  await createGame(pendingOpponentId);
+  pendingOpponentId = null;
+};
+
+// ── Grid rendering ────────────────────────────────────────────────────────────
+function buildGrid(ships, shots, revealed = []) {
+  const g = Array.from({ length: GRID }, () =>
+    Array.from({ length: GRID }, () => ({ ship: false, shot: null, rev: false }))
+  );
+  for (const s of ships) {
+    for (const p of JSON.parse(s.positions)) g[p.row][p.col].ship = true;
+  }
+  for (const s of revealed) {
+    for (const p of JSON.parse(s.positions)) g[p.row][p.col].rev = true;
+  }
+  for (const s of shots) {
+    g[s.target_row][s.target_col].shot = s.result;
+  }
+  return g;
+}
+
+function renderGrid(cellGrid, { clickFn = null, showShips = false, showRev = false } = {}) {
+  const colRow = COLS.map(l => `<div class="gcl">${l}</div>`).join('');
+  const rows = [];
+  for (let r = 0; r < GRID; r++) {
+    const cells = [];
+    for (let c = 0; c < GRID; c++) {
+      const cell = cellGrid[r][c];
+      let cls = 'gc';
+      if      (cell.shot === 'hit')  cls += ' hit';
+      else if (cell.shot === 'miss') cls += ' miss';
+      else if (cell.shot === 'sunk') cls += ' sunk';
+      else if (showShips && cell.ship) cls += ' ship';
+      else if (showRev && cell.rev)    cls += ' reveal';
+      else if (clickFn && !cell.shot)  cls += ' shootable';
+
+      const click = (clickFn && !cell.shot) ? `onclick="${clickFn}(${r},${c})"` : '';
+      cells.push(`<div class="${cls}" data-r="${r}" data-c="${c}" ${click}></div>`);
+    }
+    rows.push(`<div class="grid-row"><div class="grl">${r+1}</div>${cells.join('')}</div>`);
+  }
+  return `<div class="grid-wrap"><div class="grid-col-row">${colRow}</div>${rows.join('')}</div>`;
+}
+
+function renderSetupGrid() {
+  const placed = setupShips.map(s => ({ positions: JSON.stringify(s.positions) }));
+  const cellGrid = buildGrid(placed, []);
+  const colRow = COLS.map(l => `<div class="gcl">${l}</div>`).join('');
+  const rows = [];
+  for (let r = 0; r < GRID; r++) {
+    const cells = [];
+    for (let c = 0; c < GRID; c++) {
+      const cell = cellGrid[r][c];
+      let cls = 'gc';
+      if (cell.ship) cls += ' ship';
+      else cls += ' shootable'; // hover-targetable
+      cells.push(`<div class="${cls}" data-r="${r}" data-c="${c}" onclick="onPlace(${r},${c})" onmouseover="onHover(${r},${c})" onmouseout="onHoverOut()"></div>`);
+    }
+    rows.push(`<div class="grid-row"><div class="grl">${r+1}</div>${cells.join('')}</div>`);
+  }
+  return `<div class="grid-wrap" id="setup-grid"><div class="grid-col-row">${colRow}</div>${rows.join('')}</div>`;
+}
+
+// Apply hover highlight directly to DOM (avoids full re-render on every mouseover)
+function applyHover(row, col) {
+  document.querySelectorAll('.gc.pok,.gc.pbad').forEach(el => el.classList.remove('pok','pbad'));
+  const remaining = SHIPS.filter(s => !setupShips.some(p => p.type === s.type));
+  const ship = remaining[0];
+  if (!ship) return;
+  const placed = setupShips.map(s => ({ positions: JSON.stringify(s.positions) }));
+  const cells = shipCells(row, col, ship.size, horizontal);
+  const ok = inBounds(cells) && !overlaps(cells, placed);
+  cells.forEach(({ row:r, col:c }) => {
+    const el = document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+    if (el) el.classList.add(ok ? 'pok' : 'pbad');
+  });
+}
+
+// ── Views ─────────────────────────────────────────────────────────────────────
+function renderHome() {
+  const myTurn = [], waiting = [], done = [];
+  for (const g of games) {
+    if (g.status === 'complete') done.push(g);
+    else if (g.current_turn_id === me?.id) myTurn.push(g);
+    else waiting.push(g);
+  }
+
+  function card(g) {
+    const opp = g.challenger_id === me?.id ? g.opponent_name : g.challenger_name;
+    const mine = g.current_turn_id === me?.id;
+    let st = '';
+    if (g.status === 'pending_challenger')
+      st = mine ? 'Place your fleet to start' : `Waiting for ${esc(opp)} to set up`;
+    else if (g.status === 'pending_opponent')
+      st = mine ? 'Place your fleet!' : `Waiting for ${esc(opp)} to place their fleet`;
+    else if (g.status === 'challenger_turn' || g.status === 'opponent_turn')
+      st = mine ? 'Your turn — fire!' : `Waiting for ${esc(opp)} to fire`;
+    else
+      st = g.winner_id === me?.id ? '🏆 You won!' : `${esc(g.winner_name)} won`;
+    const urgent = mine && g.status !== 'complete';
+    return `
+      <div class="game-card ${urgent ? 'urgent' : ''}" onclick="openGame('${esc(g.id)}')">
+        <div>
+          <h3>vs. ${esc(opp)}</h3>
+          <div class="st ${urgent ? 'my' : ''}">${st}</div>
+        </div>
+        <span style="color:var(--muted);font-size:1.1rem">›</span>
+      </div>`;
+  }
+
+  const s = (label, list) => list.length ? `<div class="sec">${label} (${list.length})</div>${list.map(card).join('')}` : '';
+
+  document.getElementById('app').innerHTML = `
+    <div class="hdr">
+      <div><h1>⚓ Sea Battle</h1><div class="sub">Async naval strategy for the family</div></div>
+      <button class="btn btn-primary" onclick="openNewGame()">+ New Game</button>
+    </div>
+    ${s('Your Turn', myTurn)}
+    ${s('Waiting', waiting)}
+    ${s('Completed', done.slice(0,10))}
+    ${!games.length ? `<div class="empty"><div class="icon">⚓</div><p>No games yet.</p><p style="margin-top:6px">Challenge a family member to start!</p></div>` : ''}`;
+}
+
+function renderSetup() {
+  const g = currentGame;
+  const oppName = g.challenger_id === me?.id ? g.opponent_name : g.challenger_name;
+  const remaining = SHIPS.filter(s => !setupShips.some(p => p.type === s.type));
+  const palette = SHIPS.map(s => {
+    const done = setupShips.some(p => p.type === s.type);
+    const next = !done && s.type === remaining[0]?.type;
+    const blocks = Array.from({ length:s.size }, () => `<div class="sblock"></div>`).join('');
+    return `<div class="ship-opt ${done?'done':''} ${next?'next':''}">
+      <div class="sblocks">${blocks}</div>
+      <span>${esc(s.label)}</span>
+      ${done ? '<span style="color:#22c55e">✓</span>' : ''}
+    </div>`;
+  }).join('');
+  const allPlaced = !remaining.length;
+
+  document.getElementById('app').innerHTML = `
+    <button class="back" onclick="goHome()">‹ All Games</button>
+    <div class="hdr" style="margin-bottom:10px">
+      <div><h1>⚓ Place Your Fleet</h1><div class="sub">vs. ${esc(oppName)}</div></div>
+    </div>
+    <div class="setup-ctrl">
+      <button class="btn btn-secondary btn-sm" onclick="toggleDir()">
+        ${horizontal ? '↔ Horizontal' : '↕ Vertical'}
+      </button>
+      ${setupShips.length ? `<button class="btn btn-secondary btn-sm" onclick="undoShip()">↩ Undo</button>` : ''}
+    </div>
+    <div class="palette">${palette}</div>
+    ${remaining[0] ? `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:8px">Placing: ${esc(remaining[0].label)} (${remaining[0].size} cells) — hover to preview, click to place</p>` : ''}
+    <div style="margin-bottom:14px">${renderSetupGrid()}</div>
+    <button class="btn btn-primary" id="ready-btn" ${allPlaced?'':'disabled'} onclick="submitFleet()">
+      ${allPlaced ? '🚀 Ready to Battle!' : `Place all ships (${setupShips.length}/${SHIPS.length})`}
+    </button>`;
+}
+
+function renderWaiting(oppName) {
+  document.getElementById('app').innerHTML = `
+    <button class="back" onclick="goHome()">‹ All Games</button>
+    <div style="text-align:center;padding:48px 20px">
+      <div style="font-size:2.8rem;margin-bottom:14px">⏳</div>
+      <h2 style="margin-bottom:8px">Fleet Deployed!</h2>
+      <p style="color:var(--muted)">Waiting for ${esc(oppName)} to place their fleet…</p>
+      <button class="btn btn-secondary" style="margin-top:24px" onclick="refreshGame()">↻ Refresh</button>
+    </div>`;
+}
+
+function renderActiveGame() {
+  const g = currentGame;
+  const isChallenger = g.challenger_id === me?.id;
+  const oppName  = isChallenger ? g.opponent_name  : g.challenger_name;
+  const isMyTurn = g.current_turn_id === me?.id;
+
+  const myGrid  = renderGrid(buildGrid(myShips, opponentShots), { showShips:true });
+  const oppGrid = renderGrid(buildGrid([], myShots), {
+    showShips:false,
+    clickFn: isMyTurn ? 'onFire' : null,
+  });
+
+  const badge = isMyTurn
+    ? `<span class="badge my">🎯 Your Turn!</span>`
+    : `<span class="badge wait">⏳ ${esc(oppName)}'s Turn</span>`;
+
+  const last = myShots[myShots.length-1];
+  let lastHtml = '';
+  if (last) {
+    const icons = { hit:'💥', miss:'🌊', sunk:'🔥' };
+    const labels = { hit:'Hit!', miss:'Miss', sunk:`Sunk ${last.sunk_ship_type||''}!` };
+    lastHtml = `<div class="shot-result ${last.result}">${icons[last.result]} ${labels[last.result]} — ${COLS[last.target_col]}${last.target_row+1}</div>`;
+  }
+
+  document.getElementById('app').innerHTML = `
+    <button class="back" onclick="goHome()">‹ All Games</button>
+    <div class="status-bar">
+      <span style="font-weight:600">vs. ${esc(oppName)}</span>
+      ${badge}
+    </div>
+    ${lastHtml}
+    <div class="panels">
+      <div>
+        <div class="panel-title">Your Fleet</div>
+        ${myGrid}
+      </div>
+      <div>
+        <div class="panel-title">${isMyTurn ? '🎯 Attack!' : `${esc(oppName)}'s Waters`}</div>
+        ${oppGrid}
+        ${isMyTurn ? `<p style="font-size:0.73rem;color:var(--muted);margin-top:5px">Click a cell to fire</p>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderComplete() {
+  const g = currentGame;
+  const isChallenger = g.challenger_id === me?.id;
+  const oppName = isChallenger ? g.opponent_name : g.challenger_name;
+  const iWon = g.winner_id === me?.id;
+
+  const myGrid  = renderGrid(buildGrid(myShips, opponentShots), { showShips:true });
+  const oppGrid = renderGrid(buildGrid([], myShots, revealOpp ? opponentShips : []), { showShips:false, showRev:revealOpp });
+
+  document.getElementById('app').innerHTML = `
+    <button class="back" onclick="goHome()">‹ All Games</button>
+    <div class="banner ${iWon?'win':'lose'}">
+      <h2>${iWon ? '🏆 Victory!' : '⚓ Defeated'}</h2>
+      <p>${iWon ? `You sank ${esc(oppName)}'s entire fleet!` : `${esc(g.winner_name)} sank your last ship.`}</p>
+    </div>
+    <div class="panels">
+      <div>
+        <div class="panel-title">Your Fleet</div>
+        ${myGrid}
+      </div>
+      <div>
+        <div class="panel-title">${esc(oppName)}'s Waters</div>
+        ${oppGrid}
+        <button class="btn btn-secondary btn-sm" style="margin-top:8px" onclick="toggleReveal()">
+          ${revealOpp ? '🙈 Hide Fleet' : '👁 Reveal Fleet'}
+        </button>
+      </div>
+    </div>
+    <div style="margin-top:20px;text-align:center">
+      <button class="btn btn-primary" onclick="openNewGame()">+ New Game</button>
+    </div>`;
+}
+
+function render() {
+  if (view === 'loading') {
+    document.getElementById('app').innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:60vh;color:var(--muted)">Loading…</div>`;
+    return;
+  }
+  if (view === 'home') { renderHome(); return; }
+  if (view !== 'game') return;
+
+  const g = currentGame;
+  if (!g) { goHome(); return; }
+
+  const isChallenger = g.challenger_id === me?.id;
+  const isMySetupTurn = (g.status === 'pending_challenger' && isChallenger) ||
+                        (g.status === 'pending_opponent'   && !isChallenger);
+  const oppName = isChallenger ? g.opponent_name : g.challenger_name;
+
+  if (isMySetupTurn && myShips.length === 0) { renderSetup(); return; }
+  if ((g.status === 'pending_challenger' || g.status === 'pending_opponent') && !isMySetupTurn) {
+    renderWaiting(oppName); return;
+  }
+  if (g.status === 'complete') { renderComplete(); return; }
+  renderActiveGame();
+}
+
+// ── Event handlers (called from onclick attrs) ────────────────────────────────
+window.onFire = async function(row, col) {
+  if (!currentGame || currentGame.current_turn_id !== me?.id) return;
+  document.querySelectorAll('.gc.shootable').forEach(el => {
+    el.classList.remove('shootable');
+    el.onclick = null;
+  });
+  await fireAt(currentGame.id, row, col);
+};
+
+window.onPlace = function(row, col) {
+  const remaining = SHIPS.filter(s => !setupShips.some(p => p.type === s.type));
+  const ship = remaining[0];
+  if (!ship) return;
+  const placed = setupShips.map(s => ({ positions: JSON.stringify(s.positions) }));
+  if (!validPlace(row, col, ship.size, horizontal, placed)) return;
+  const positions = shipCells(row, col, ship.size, horizontal);
+  setupShips = [...setupShips, { ...ship, positions }];
+  renderSetup();
+};
+
+window.onHover    = function(row, col) { applyHover(row, col); };
+window.onHoverOut = function()          { document.querySelectorAll('.gc.pok,.gc.pbad').forEach(el=>el.classList.remove('pok','pbad')); };
+
+window.toggleDir = function() { horizontal = !horizontal; renderSetup(); };
+window.undoShip  = function() { setupShips = setupShips.slice(0,-1); renderSetup(); };
+
+window.submitFleet = async function() {
+  if (!currentGame || setupShips.length !== SHIPS.length) return;
+  const btn = document.getElementById('ready-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Deploying…'; }
+  await placeFleet(currentGame.id);
+};
+
+window.refreshGame = async function() {
+  if (!currentGame) return;
+  await loadGameDetail(currentGame.id);
+  render();
+};
+
+window.toggleReveal = function() { revealOpp = !revealOpp; renderComplete(); };
+
+// ── Deep link ─────────────────────────────────────────────────────────────────
+function handleDeepLink() {
+  const gameId = new URLSearchParams(window.location.search).get('gameId');
+  if (gameId) openGame(gameId);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  await loadMembers();
+  await loadGames();
+  view = 'home';
+  handleDeepLink();
+  if (view === 'home') render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "id": "sea-battle",
+  "name": "Sea Battle",
+  "version": "1.0.0",
+  "description": "Async turn-based naval grid game — challenge a family member, place your fleet, and fire away.",
+  "entrypoint": "index.html",
+  "runtime": "static",
+  "category": "games",
+  "tags": ["games", "kids", "strategy", "turn-based"],
+  "icon": "⚓",
+  "storage": "db",
+  "data_access": {
+    "reads": ["family.members"],
+    "writes": []
+  },
+  "permissions": {
+    "default_audience": "everyone",
+    "requires_approval": false
+  },
+  "resource_limits": {
+    "max_db_bytes": 52428800
+  },
+  "publishes": ["sea-battle.game-started", "sea-battle.game-complete"],
+  "alert_on": ["sea-battle.game-started", "sea-battle.game-complete"]
+}
