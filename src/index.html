@@ -247,6 +247,27 @@ let revealOpp   = false;
 let modalEl = null;
 let pendingOpponentId = null;
 
+// Polling
+let pollTimer = null;
+const POLL_MS = 5000;
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+function maybeStartPolling(gameId) {
+  stopPolling();
+  const g = currentGame;
+  if (!g || g.status === 'complete' || g.current_turn_id === me?.id) return;
+  pollTimer = setInterval(async () => {
+    await loadGameDetail(gameId);
+    if (!currentGame || currentGame.status === 'complete' || currentGame.current_turn_id === me?.id) {
+      stopPolling();
+    }
+    render();
+  }, POLL_MS);
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function esc(s) {
   return String(s ?? '')
@@ -415,6 +436,7 @@ async function placeFleet(gameId) {
 
   await loadGameDetail(gameId);
   render();
+  maybeStartPolling(gameId);
 }
 
 async function fireAt(gameId, row, col) {
@@ -465,6 +487,7 @@ async function fireAt(gameId, row, col) {
 
   await loadGameDetail(gameId);
   render();
+  maybeStartPolling(gameId);
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -475,9 +498,11 @@ async function openGame(gameId) {
   await loadGameDetail(gameId);
   view = 'game';
   render();
+  maybeStartPolling(gameId);
 }
 
 function goHome() {
+  stopPolling();
   currentGame = null;
   myShips = opponentShips = myShots = opponentShots = [];
   setupShips = [];
