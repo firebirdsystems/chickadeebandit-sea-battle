@@ -510,6 +510,36 @@ function goHome() {
   render();
 }
 
+// ── Resign ────────────────────────────────────────────────────────────────────
+function resign(gameId) {
+  openModal(`
+    <h3 style="margin-bottom:12px">🏳️ Resign Game?</h3>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:20px">
+      This will end the game and hand victory to your opponent.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmResign('${esc(gameId)}')">Resign</button>
+    </div>`);
+}
+
+window.confirmResign = async function(gameId) {
+  closeModal();
+  const g = currentGame;
+  if (!g || !me) return;
+  const oppId   = g.challenger_id === me.id ? g.opponent_id   : g.challenger_id;
+  const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
+  const now = new Date().toISOString();
+  await db(
+    `UPDATE sea_battle_games SET status = 'complete', winner_id = ?, winner_name = ?, resigned_by_id = ?, updated_at = ? WHERE id = ?`,
+    [oppId, oppName, me.id, now, gameId]
+  );
+  notify('🏳️ Victory by Resignation', `${me.name} resigned. You win!`, oppId, gameId);
+  stopPolling();
+  await loadGameDetail(gameId);
+  render();
+};
+
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function openModal(html) {
   closeModal();
@@ -721,6 +751,7 @@ function renderWaiting(oppName) {
       <h2 style="margin-bottom:8px">Fleet Deployed!</h2>
       <p style="color:var(--muted)">Waiting for ${esc(oppName)} to place their fleet…</p>
       <button class="btn btn-secondary" style="margin-top:24px" onclick="refreshGame()">↻ Refresh</button>
+      <button class="btn btn-danger" style="margin-top:10px" onclick="resign('${esc(currentGame.id)}')">🏳️ Resign</button>
     </div>`;
 }
 
@@ -765,6 +796,9 @@ function renderActiveGame() {
         ${oppGrid}
         ${isMyTurn ? `<p style="font-size:0.73rem;color:var(--muted);margin-top:5px">Click a cell to fire</p>` : ''}
       </div>
+    </div>
+    <div style="margin-top:16px;text-align:center">
+      <button class="btn btn-secondary btn-sm" onclick="resign('${esc(g.id)}')">🏳️ Resign</button>
     </div>`;
 }
 
@@ -772,16 +806,23 @@ function renderComplete() {
   const g = currentGame;
   const isChallenger = g.challenger_id === me?.id;
   const oppName = isChallenger ? g.opponent_name : g.challenger_name;
-  const iWon = g.winner_id === me?.id;
+  const iWon      = g.winner_id === me?.id;
+  const iResigned = g.resigned_by_id === me?.id;
+  const oppResigned = g.resigned_by_id && g.resigned_by_id !== me?.id;
+
+  const bannerMsg = iResigned    ? `You resigned. ${esc(oppName)} wins.`
+                  : oppResigned  ? `${esc(oppName)} resigned. You win!`
+                  : iWon         ? `You sank ${esc(oppName)}'s entire fleet!`
+                  :                `${esc(g.winner_name)} sank your last ship.`;
 
   const myGrid  = renderGrid(buildGrid(myShips, opponentShots), { showShips:true });
   const oppGrid = renderGrid(buildGrid([], myShots, revealOpp ? opponentShips : []), { showShips:false, showRev:revealOpp });
 
   document.getElementById('app').innerHTML = `
     <button class="back" onclick="goHome()">‹ All Games</button>
-    <div class="banner ${iWon?'win':'lose'}">
-      <h2>${iWon ? '🏆 Victory!' : '⚓ Defeated'}</h2>
-      <p>${iWon ? `You sank ${esc(oppName)}'s entire fleet!` : `${esc(g.winner_name)} sank your last ship.`}</p>
+    <div class="banner ${iWon && !iResigned ? 'win' : 'lose'}">
+      <h2>${iWon && !iResigned ? '🏆 Victory!' : iResigned ? '🏳️ Resigned' : '⚓ Defeated'}</h2>
+      <p>${bannerMsg}</p>
     </div>
     <div class="panels">
       <div>
@@ -866,6 +907,7 @@ window.refreshGame = async function() {
 };
 
 window.toggleReveal = function() { revealOpp = !revealOpp; renderComplete(); };
+window.resign = function(gameId) { resign(gameId); };
 
 // ── Deep link ─────────────────────────────────────────────────────────────────
 function handleDeepLink() {
