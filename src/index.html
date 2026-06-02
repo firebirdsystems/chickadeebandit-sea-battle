@@ -224,6 +224,7 @@ const AVATARS = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#2
 // ── Runtime globals ───────────────────────────────────────────────────────────
 const CONTEXT     = window.__CONTEXT_URL    ?? '';
 const DB_URL      = window.__DB_URL         ?? '';
+const FIRE_URL    = DB_URL.replace('api/db', 'api/game/fire');
 const EVENTS_URL  = window.__EVENTS_URL     ?? '/api/events';
 const APP_ID      = window.__APP_ID         ?? 'sea-battle';
 const ME          = window.__CURRENT_MEMBER ?? null;
@@ -347,22 +348,6 @@ function validPlace(row, col, size, horiz, placed) {
   const cells = shipCells(row, col, size, horiz);
   return inBounds(cells) && !overlaps(cells, placed);
 }
-function evalShot(row, col, ships, prior) {
-  for (const s of ships) {
-    const pos = JSON.parse(s.positions);
-    if (!pos.some(p => p.row===row && p.col===col)) continue;
-    const priorHits = new Set(
-      prior.filter(x => x.result==='hit'||x.result==='sunk').map(x=>`${x.target_row},${x.target_col}`)
-    );
-    const allHit = pos.every(p => (p.row===row && p.col===col) || priorHits.has(`${p.row},${p.col}`));
-    return allHit ? { result:'sunk', shipType:s.ship_type } : { result:'hit', shipType:null };
-  }
-  return { result:'miss', shipType:null };
-}
-function allSunk(ships, shots) {
-  const hits = new Set(shots.filter(s=>s.result==='hit'||s.result==='sunk').map(s=>`${s.target_row},${s.target_col}`));
-  return ships.every(s => JSON.parse(s.positions).every(p => hits.has(`${p.row},${p.col}`)));
-}
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 async function loadMembers() {
@@ -388,21 +373,33 @@ async function loadGames() {
 }
 
 async function loadGameDetail(gameId) {
-  const { rows } = await db('SELECT * FROM sea_battle_games WHERE id = ?', [gameId]);
-  if (!rows.length) return;
-  currentGame = rows[0];
-  const g = currentGame;
   const myId = me?.id;
-  const oppId = g.challenger_id === myId ? g.opponent_id : g.challenger_id;
+  // If we already have this game in memory, we know oppId without waiting for the game row
+  const prior      = currentGame?.id === gameId ? currentGame : null;
+  const priorOppId = prior ? (prior.challenger_id === myId ? prior.opponent_id : prior.challenger_id) : null;
 
-  const [myShipRows, oppShotRows, myShotRows] = await Promise.all([
-    db('SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, myId]),
-    db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, oppId]),
-    db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, myId]),
-  ]);
-  myShips      = myShipRows.rows;
+  // Launch everything we can immediately — my ships/shots don't depend on oppId
+  const gameQ   = db('SELECT * FROM sea_battle_games WHERE id = ?', [gameId]);
+  const myShipQ = db('SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, myId]);
+  const myShotQ = db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, myId]);
+  const oppShotQ = priorOppId
+    ? db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, priorOppId])
+    : null;
+
+  const [gameRes, myShipRows, myShotRows] = await Promise.all([gameQ, myShipQ, myShotQ]);
+  if (!gameRes.rows.length) return;
+  currentGame   = gameRes.rows[0];
+  const g       = currentGame;
+  const oppId   = g.challenger_id === myId ? g.opponent_id : g.challenger_id;
+
+  myShips = myShipRows.rows;
+  myShots = myShotRows.rows;
+
+  // Opp shots query was already in-flight if we knew oppId, otherwise start it now
+  const oppShotRows = await (oppShotQ ?? db(
+    'SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, oppId]
+  ));
   opponentShots = oppShotRows.rows;
-  myShots      = myShotRows.rows;
 
   if (g.status === 'complete') {
     const { rows: oppRows } = await db(
@@ -437,19 +434,19 @@ async function placeFleet(gameId) {
   const isChallenger = g.challenger_id === me.id;
   const now = new Date().toISOString();
 
-  for (const s of setupShips) {
-    await db(
+  const newStatus  = isChallenger ? 'pending_opponent' : 'challenger_turn';
+  const nextTurnId = isChallenger ? g.opponent_id : g.challenger_id;
+
+  await Promise.all([
+    ...setupShips.map(s => db(
       'INSERT INTO sea_battle_ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)',
       [uid(), gameId, me.id, s.type, s.size, JSON.stringify(s.positions)]
-    );
-  }
-
-  const newStatus   = isChallenger ? 'pending_opponent' : 'challenger_turn';
-  const nextTurnId  = isChallenger ? g.opponent_id : g.challenger_id;
-  await db(
-    'UPDATE sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
-    [newStatus, nextTurnId, now, gameId]
-  );
+    )),
+    db(
+      'UPDATE sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
+      [newStatus, nextTurnId, now, gameId]
+    ),
+  ]);
 
   if (isChallenger) {
     notify('⚓ Sea Battle Challenge!', `${me.name} challenged you! Place your fleet.`, g.opponent_id, gameId);
@@ -468,48 +465,39 @@ async function fireAt(gameId, row, col) {
   if (g.current_turn_id !== me.id) return;
   if (myShots.some(s => s.target_row === row && s.target_col === col)) return;
 
-  const oppId = g.challenger_id === me.id ? g.opponent_id : g.challenger_id;
-  const { rows: oppShips } = await db(
-    'SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, oppId]
-  );
-  const { result, shipType } = evalShot(row, col, oppShips, myShots);
-  const now = new Date().toISOString();
-
-  await db(
-    'INSERT INTO sea_battle_shots (id, game_id, shooter_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [uid(), gameId, me.id, row, col, result, shipType ?? null, now]
-  );
-
-  const allShots = [...myShots, { target_row:row, target_col:col, result }];
-  const won = allSunk(oppShips, allShots);
-  const coord = `${COLS[col]}${row+1}`;
-
-  if (won) {
-    const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
-    await db(
-      'UPDATE sea_battle_games SET status = \'complete\', winner_id = ?, winner_name = ?, updated_at = ? WHERE id = ?',
-      [me.id, me.name, now, gameId]
-    );
-    notify('🏆 You Win!', `You sank ${oppName}'s last ship!`, me.id, gameId);
-    notify('💥 Game Over', `${me.name} sank your last ship. Better luck next time!`, oppId, gameId);
-  } else {
-    const nextStatus = g.challenger_id === me.id ? 'opponent_turn' : 'challenger_turn';
-    await db(
-      'UPDATE sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
-      [nextStatus, oppId, now, gameId]
-    );
-    const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
-    if (result === 'miss') {
-      notify('🌊 Miss!', `${me.name} shot ${coord} and missed. Your turn!`, oppId, gameId);
-    } else if (result === 'sunk') {
-      notify(`🔥 Sunk!`, `${me.name} sank your ${shipType}! Fire back!`, oppId, gameId);
-    } else {
-      notify('💥 Hit!', `${me.name} hit your ship at ${coord}! Fire back!`, oppId, gameId);
-    }
+  const res = await fetch(FIRE_URL, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId, row, col, shotId: uid() }),
+  });
+  if (!res.ok) {
+    console.error('Fire shot failed:', await res.json().catch(() => ({})));
+    return;
   }
 
-  await loadGameDetail(gameId);
-  if (won) publishGameResult(currentGame);
+  const { result, sunk_ship_type: shipType, won, shot_at, new_status, new_turn_id, winner_id, winner_name, opponent_ships } = await res.json();
+  const coord   = `${COLS[col]}${row+1}`;
+  const oppId   = g.challenger_id === me.id ? g.opponent_id   : g.challenger_id;
+  const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
+
+  // Update local state directly from server response — no reload round trip needed
+  myShots = [...myShots, { target_row: row, target_col: col, result, sunk_ship_type: shipType ?? null, shot_at }];
+  currentGame = { ...g, status: new_status, current_turn_id: new_turn_id, winner_id: winner_id ?? null, winner_name: winner_name ?? null, updated_at: shot_at };
+  if (won && opponent_ships) opponentShips = opponent_ships;
+
+  if (won) {
+    notify('🏆 You Win!',  `You sank ${oppName}'s last ship!`, me.id, gameId);
+    notify('💥 Game Over', `${me.name} sank your last ship. Better luck next time!`, oppId, gameId);
+    publishGameResult(currentGame);
+  } else if (result === 'miss') {
+    notify('🌊 Miss!', `${me.name} shot ${coord} and missed. Your turn!`, oppId, gameId);
+  } else if (result === 'sunk') {
+    notify('🔥 Sunk!', `${me.name} sank your ${shipType}! Fire back!`, oppId, gameId);
+  } else {
+    notify('💥 Hit!', `${me.name} hit your ship at ${coord}! Fire back!`, oppId, gameId);
+  }
+
   render();
   maybeStartPolling(gameId);
 }
