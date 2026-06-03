@@ -226,6 +226,7 @@ const CONTEXT     = window.__CONTEXT_URL    ?? '';
 const DB_URL      = window.__DB_URL         ?? '';
 const FIRE_URL    = DB_URL.replace('api/db', 'api/game/fire');
 const EVENTS_URL  = window.__EVENTS_URL     ?? '/api/events';
+const STREAM_URL  = window.__STREAM_URL     ?? '';
 const APP_ID      = window.__APP_ID         ?? 'sea-battle';
 const ME          = window.__CURRENT_MEMBER ?? null;
 
@@ -249,25 +250,64 @@ let revealOpp   = false;
 let modalEl = null;
 let pendingOpponentId = null;
 
-// Polling
-let pollTimer = null;
-const POLL_MS = 5000;
+// Watching (SSE when tab visible, polling fallback when hidden)
+let pollTimer  = null;
+let streamConn = null;
+const POLL_MS  = 5000;
+
+function isWaiting() {
+  return currentGame &&
+         currentGame.status !== 'complete' &&
+         currentGame.current_turn_id !== me?.id;
+}
 
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
 }
 
-function maybeStartPolling(gameId) {
+function stopStream() {
+  if (streamConn) { streamConn.disconnect(); streamConn = null; }
+}
+
+function stopWatching() {
   stopPolling();
-  const g = currentGame;
-  if (!g || g.status === 'complete' || g.current_turn_id === me?.id) return;
-  pollTimer = setInterval(async () => {
-    await loadGameDetail(gameId);
-    if (!currentGame || currentGame.status === 'complete' || currentGame.current_turn_id === me?.id) {
-      stopPolling();
-    }
-    render();
-  }, POLL_MS);
+  stopStream();
+}
+
+function createStreamHelper(streamUrl, eventType, callback) {
+  let es = null;
+  let stopped = false;
+  function connect() {
+    if (!streamUrl || stopped) return;
+    const url = eventType ? `${streamUrl}?type=${encodeURIComponent(eventType)}` : streamUrl;
+    es = new EventSource(url);
+    es.addEventListener('event', (e) => {
+      try { callback(JSON.parse(e.data)); } catch { /* skip malformed */ }
+    });
+    es.onerror = () => { es?.close(); es = null; if (!stopped) setTimeout(connect, 2000); };
+  }
+  function disconnect() { stopped = true; es?.close(); es = null; }
+  return { connect, disconnect };
+}
+
+function maybeStartWatching(gameId) {
+  stopWatching();
+  if (!isWaiting()) return;
+  if (STREAM_URL && document.visibilityState === 'visible') {
+    streamConn = createStreamHelper(STREAM_URL, 'sea-battle.move-fired', async (event) => {
+      if (event.payload?.gameId !== gameId) return;
+      await loadGameDetail(gameId);
+      if (!isWaiting()) stopWatching();
+      render();
+    });
+    streamConn.connect();
+  } else {
+    pollTimer = setInterval(async () => {
+      await loadGameDetail(gameId);
+      if (!isWaiting()) stopPolling();
+      render();
+    }, POLL_MS);
+  }
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
@@ -456,7 +496,7 @@ async function placeFleet(gameId) {
 
   await loadGameDetail(gameId);
   render();
-  maybeStartPolling(gameId);
+  maybeStartWatching(gameId);
 }
 
 async function fireAt(gameId, row, col) {
@@ -490,16 +530,28 @@ async function fireAt(gameId, row, col) {
     notify('🏆 You Win!',  `You sank ${oppName}'s last ship!`, me.id, gameId);
     notify('💥 Game Over', `${me.name} sank your last ship. Better luck next time!`, oppId, gameId);
     publishGameResult(currentGame);
-  } else if (result === 'miss') {
-    notify('🌊 Miss!', `${me.name} shot ${coord} and missed. Your turn!`, oppId, gameId);
-  } else if (result === 'sunk') {
-    notify('🔥 Sunk!', `${me.name} sank your ${shipType}! Fire back!`, oppId, gameId);
   } else {
-    notify('💥 Hit!', `${me.name} hit your ship at ${coord}! Fire back!`, oppId, gameId);
+    // Signal the opponent via SSE that it's their turn
+    fetch(EVENTS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source_app_id: APP_ID,
+        type: 'sea-battle.move-fired',
+        payload: { gameId, actorId: me.id },
+      }),
+    }).catch(() => {});
+    if (result === 'miss') {
+      notify('🌊 Miss!', `${me.name} shot ${coord} and missed. Your turn!`, oppId, gameId);
+    } else if (result === 'sunk') {
+      notify('🔥 Sunk!', `${me.name} sank your ${shipType}! Fire back!`, oppId, gameId);
+    } else {
+      notify('💥 Hit!', `${me.name} hit your ship at ${coord}! Fire back!`, oppId, gameId);
+    }
   }
 
   render();
-  maybeStartPolling(gameId);
+  maybeStartWatching(gameId);
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -510,11 +562,11 @@ async function openGame(gameId) {
   await loadGameDetail(gameId);
   view = 'game';
   render();
-  maybeStartPolling(gameId);
+  maybeStartWatching(gameId);
 }
 
 function goHome() {
-  stopPolling();
+  stopWatching();
   currentGame = null;
   myShips = opponentShips = myShots = opponentShots = [];
   setupShips = [];
@@ -547,7 +599,7 @@ window.confirmResign = async function(gameId) {
     [oppId, oppName, me.id, now, gameId]
   );
   notify('🏳️ Victory by Resignation', `${me.name} resigned. You win!`, oppId, gameId);
-  stopPolling();
+  stopWatching();
   await loadGameDetail(gameId);
   publishGameResult(currentGame);
   render();
@@ -921,6 +973,27 @@ window.refreshGame = async function() {
 
 window.toggleReveal = function() { revealOpp = !revealOpp; renderComplete(); };
 window.resign = function(gameId) { resign(gameId); };
+
+// ── Visibility-based watch mode ───────────────────────────────────────────────
+document.addEventListener('visibilitychange', () => {
+  if (!currentGame || view !== 'game') return;
+  const gameId = currentGame.id;
+  if (document.visibilityState === 'hidden') {
+    // Tab backgrounded — drop SSE, start polling to save server resources
+    stopStream();
+    if (isWaiting()) {
+      pollTimer = setInterval(async () => {
+        await loadGameDetail(gameId);
+        if (!isWaiting()) stopPolling();
+        render();
+      }, POLL_MS);
+    }
+  } else {
+    // Tab foregrounded — upgrade back to SSE
+    stopPolling();
+    maybeStartWatching(gameId);
+  }
+});
 
 // ── Deep link ─────────────────────────────────────────────────────────────────
 function handleDeepLink() {
