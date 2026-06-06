@@ -344,14 +344,17 @@ function publishGameResult(game) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       source_app_id: APP_ID,
-      type: 'sea-battle.game-completed',
+      type: 'game.completed',
       subject_id: game.winner_id,
       payload: {
-        winnerId:   game.winner_id,
-        winnerName: game.winner_name,
-        loserId,
-        loserName,
-        resigned: !!game.resigned_by_id,
+        game_type:    "1v1",
+        winner_id:    game.winner_id,
+        winner_name:  game.winner_name,
+        loser_id:     loserId,
+        loser_name:   loserName,
+        resigned:     !!game.resigned_by_id,
+        category_name: "Sea Battle",
+        category_icon: "⚓",
       },
     }),
   }).catch(() => {});

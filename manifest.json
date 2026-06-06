@@ -21,6 +21,6 @@
     "max_db_bytes": 52428800
   },
   "nav": { "label": "Sea Battle" },
-  "publishes": ["sea-battle.game-started", "sea-battle.game-complete"],
-  "alert_on": ["sea-battle.game-started", "sea-battle.game-complete"]
+  "publishes": ["sea-battle.game-started", "game.completed"],
+  "alert_on": ["sea-battle.game-started", "game.completed"]
 }
