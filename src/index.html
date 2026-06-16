@@ -409,7 +409,7 @@ async function loadMembers() {
 async function loadGames() {
   if (!me) return;
   const { rows } = await db(
-    'SELECT * FROM sea_battle_games WHERE (challenger_id = ? OR opponent_id = ?) ORDER BY updated_at DESC',
+    'SELECT * FROM app_sea_battle__sea_battle_games WHERE (challenger_id = ? OR opponent_id = ?) ORDER BY updated_at DESC',
     [me.id, me.id]
   );
   games = rows;
@@ -422,11 +422,11 @@ async function loadGameDetail(gameId) {
   const priorOppId = prior ? (prior.challenger_id === myId ? prior.opponent_id : prior.challenger_id) : null;
 
   // Launch everything we can immediately — my ships/shots don't depend on oppId
-  const gameQ   = db('SELECT * FROM sea_battle_games WHERE id = ?', [gameId]);
-  const myShipQ = db('SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, myId]);
-  const myShotQ = db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, myId]);
+  const gameQ   = db('SELECT * FROM app_sea_battle__sea_battle_games WHERE id = ?', [gameId]);
+  const myShipQ = db('SELECT * FROM app_sea_battle__sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, myId]);
+  const myShotQ = db('SELECT * FROM app_sea_battle__sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, myId]);
   const oppShotQ = priorOppId
-    ? db('SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, priorOppId])
+    ? db('SELECT * FROM app_sea_battle__sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, priorOppId])
     : null;
 
   const [gameRes, myShipRows, myShotRows] = await Promise.all([gameQ, myShipQ, myShotQ]);
@@ -440,13 +440,13 @@ async function loadGameDetail(gameId) {
 
   // Opp shots query was already in-flight if we knew oppId, otherwise start it now
   const oppShotRows = await (oppShotQ ?? db(
-    'SELECT * FROM sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, oppId]
+    'SELECT * FROM app_sea_battle__sea_battle_shots WHERE game_id = ? AND shooter_id = ? ORDER BY shot_at', [gameId, oppId]
   ));
   opponentShots = oppShotRows.rows;
 
   if (g.status === 'complete') {
     const { rows: oppRows } = await db(
-      'SELECT * FROM sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, oppId]
+      'SELECT * FROM app_sea_battle__sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, oppId]
     );
     opponentShips = oppRows;
   } else {
@@ -461,7 +461,7 @@ async function createGame(opponentId) {
   const gameId = uid();
   const now = new Date().toISOString();
   await db(
-    `INSERT INTO sea_battle_games
+    `INSERT INTO app_sea_battle__sea_battle_games
      (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, 'pending_challenger', ?, ?, ?)`,
     [gameId, me.id, me.name, opp.id, opp.name, me.id, now, now]
@@ -482,11 +482,11 @@ async function placeFleet(gameId) {
 
   await Promise.all([
     ...setupShips.map(s => db(
-      'INSERT INTO sea_battle_ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO app_sea_battle__sea_battle_ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)',
       [uid(), gameId, me.id, s.type, s.size, JSON.stringify(s.positions)]
     )),
     db(
-      'UPDATE sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
+      'UPDATE app_sea_battle__sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
       [newStatus, nextTurnId, now, gameId]
     ),
   ]);
@@ -598,7 +598,7 @@ window.confirmResign = async function(gameId) {
   const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
   const now = new Date().toISOString();
   await db(
-    `UPDATE sea_battle_games SET status = 'complete', winner_id = ?, winner_name = ?, resigned_by_id = ?, updated_at = ? WHERE id = ?`,
+    `UPDATE app_sea_battle__sea_battle_games SET status = 'complete', winner_id = ?, winner_name = ?, resigned_by_id = ?, updated_at = ? WHERE id = ?`,
     [oppId, oppName, me.id, now, gameId]
   );
   notify('🏳️ Victory by Resignation', `${me.name} resigned. You win!`, oppId, gameId);
