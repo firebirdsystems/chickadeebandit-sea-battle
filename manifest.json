@@ -22,5 +22,20 @@
   },
   "nav": { "label": "Sea Battle" },
   "publishes": ["sea-battle.game-started", "game.completed"],
-  "alert_on": ["sea-battle.game-started", "game.completed"]
+  "alert_on": ["sea-battle.game-started", "game.completed"],
+  "row_policies": {
+    "app_sea_battle__sea_battle_games": {
+      "kind": "party_scoped",
+      "member_columns": ["challenger_id", "opponent_id"],
+      "self_column": "challenger_id"
+    },
+    "app_sea_battle__sea_battle_ships": {
+      "kind": "party_scoped",
+      "member_columns": ["owner_id"]
+    },
+    "app_sea_battle__sea_battle_shots": {
+      "kind": "party_scoped",
+      "member_columns": ["shooter_id", "target_player_id"]
+    }
+  }
 }

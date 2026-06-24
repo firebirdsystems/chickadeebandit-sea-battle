@@ -222,13 +222,16 @@ const SHIPS = [
 const AVATARS = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#64748b'];
 
 // ── Runtime globals ───────────────────────────────────────────────────────────
-const CONTEXT     = window.__CONTEXT_URL    ?? '';
-const DB_URL      = window.__DB_URL         ?? '';
-const FIRE_URL    = DB_URL.replace('api/db', 'api/game/fire');
-const EVENTS_URL  = window.__EVENTS_URL     ?? '/api/events';
-const STREAM_URL  = window.__STREAM_URL     ?? '';
-const APP_ID      = window.__APP_ID         ?? 'sea-battle';
-const ME          = window.__CURRENT_MEMBER ?? null;
+const CONTEXT          = window.__CONTEXT_URL    ?? '';
+const DB_URL           = window.__DB_URL         ?? '';
+const FIRE_URL         = DB_URL.replace('api/db', 'api/game/fire');
+const PLACE_FLEET_URL  = DB_URL.replace('api/db', 'api/game/place-fleet');
+const RESIGN_URL       = DB_URL.replace('api/db', 'api/game/resign');
+const SHIPS_URL        = DB_URL.replace('api/db', 'api/game/ships');
+const EVENTS_URL       = window.__EVENTS_URL     ?? '/api/events';
+const STREAM_URL       = window.__STREAM_URL     ?? '';
+const APP_ID           = window.__APP_ID         ?? 'sea-battle';
+const ME               = window.__CURRENT_MEMBER ?? null;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let members       = [];
@@ -336,30 +339,6 @@ async function db(sql, params = []) {
 }
 
 // ── Events ────────────────────────────────────────────────────────────────────
-function publishGameResult(game) {
-  const loserId   = game.challenger_id === game.winner_id ? game.opponent_id   : game.challenger_id;
-  const loserName = game.challenger_id === game.winner_id ? game.opponent_name : game.challenger_name;
-  fetch(EVENTS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      source_app_id: APP_ID,
-      type: 'game.completed',
-      subject_id: game.winner_id,
-      payload: {
-        game_type:    "1v1",
-        winner_id:    game.winner_id,
-        winner_name:  game.winner_name,
-        loser_id:     loserId,
-        loser_name:   loserName,
-        resigned:     !!game.resigned_by_id,
-        category_name: "Sea Battle",
-        category_icon: "⚓",
-      },
-    }),
-  }).catch(() => {});
-}
-
 // ── Notify ────────────────────────────────────────────────────────────────────
 function notify(title, body, audience, gameId) {
   const url = gameId ? `/open/${APP_ID}?gameId=${gameId}` : `/run/${APP_ID}`;
@@ -445,10 +424,8 @@ async function loadGameDetail(gameId) {
   opponentShots = oppShotRows.rows;
 
   if (g.status === 'complete') {
-    const { rows: oppRows } = await db(
-      'SELECT * FROM app_sea_battle__sea_battle_ships WHERE game_id = ? AND owner_id = ?', [gameId, oppId]
-    );
-    opponentShips = oppRows;
+    const shipsRes = await fetch(`${SHIPS_URL}?gameId=${encodeURIComponent(gameId)}`, { credentials: 'include' });
+    opponentShips = shipsRes.ok ? (await shipsRes.json()).ships : [];
   } else {
     opponentShips = [];
   }
@@ -475,21 +452,21 @@ async function placeFleet(gameId) {
   if (!me || setupShips.length !== SHIPS.length) return;
   const g = currentGame;
   const isChallenger = g.challenger_id === me.id;
-  const now = new Date().toISOString();
 
-  const newStatus  = isChallenger ? 'pending_opponent' : 'challenger_turn';
-  const nextTurnId = isChallenger ? g.opponent_id : g.challenger_id;
-
-  await Promise.all([
-    ...setupShips.map(s => db(
-      'INSERT INTO app_sea_battle__sea_battle_ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)',
-      [uid(), gameId, me.id, s.type, s.size, JSON.stringify(s.positions)]
-    )),
-    db(
-      'UPDATE app_sea_battle__sea_battle_games SET status = ?, current_turn_id = ?, updated_at = ? WHERE id = ?',
-      [newStatus, nextTurnId, now, gameId]
-    ),
-  ]);
+  const res = await fetch(PLACE_FLEET_URL, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId, ships: setupShips.map(s => ({ type: s.type, size: s.size, positions: s.positions })) }),
+  });
+  if (!res.ok) {
+    console.error('Place fleet failed:', await res.json().catch(() => ({})));
+    return;
+  }
+  const { new_status, new_turn_id, updated_at } = await res.json();
+  currentGame = { ...g, status: new_status, current_turn_id: new_turn_id, updated_at };
+  myShips = setupShips.map(s => ({ game_id: gameId, owner_id: me.id, ship_type: s.type, ship_size: s.size, positions: JSON.stringify(s.positions) }));
+  setupShips = [];
 
   if (isChallenger) {
     notify('⚓ Sea Battle Challenge!', `${me.name} challenged you! Place your fleet.`, g.opponent_id, gameId);
@@ -497,7 +474,6 @@ async function placeFleet(gameId) {
     notify('🚢 Fleet Ready!', `${g.opponent_name} placed their fleet. Your move, ${g.challenger_name}!`, g.challenger_id, gameId);
   }
 
-  await loadGameDetail(gameId);
   render();
   maybeStartWatching(gameId);
 }
@@ -532,7 +508,6 @@ async function fireAt(gameId, row, col) {
   if (won) {
     notify('🏆 You Win!',  `You sank ${oppName}'s last ship!`, me.id, gameId);
     notify('💥 Game Over', `${me.name} sank your last ship. Better luck next time!`, oppId, gameId);
-    publishGameResult(currentGame);
   } else {
     // Signal the opponent via SSE that it's their turn
     fetch(EVENTS_URL, {
@@ -594,17 +569,21 @@ window.confirmResign = async function(gameId) {
   closeModal();
   const g = currentGame;
   if (!g || !me) return;
-  const oppId   = g.challenger_id === me.id ? g.opponent_id   : g.challenger_id;
-  const oppName = g.challenger_id === me.id ? g.opponent_name : g.challenger_name;
-  const now = new Date().toISOString();
-  await db(
-    `UPDATE app_sea_battle__sea_battle_games SET status = 'complete', winner_id = ?, winner_name = ?, resigned_by_id = ?, updated_at = ? WHERE id = ?`,
-    [oppId, oppName, me.id, now, gameId]
-  );
-  notify('🏳️ Victory by Resignation', `${me.name} resigned. You win!`, oppId, gameId);
+
+  const res = await fetch(RESIGN_URL, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId }),
+  });
+  if (!res.ok) {
+    console.error('Resign failed:', await res.json().catch(() => ({})));
+    return;
+  }
+  const { winner_id, winner_name, resigned_by_id, updated_at } = await res.json();
+  currentGame = { ...g, status: 'complete', winner_id, winner_name, resigned_by_id, updated_at };
+  notify('🏳️ Victory by Resignation', `${me.name} resigned. You win!`, winner_id, gameId);
   stopWatching();
-  await loadGameDetail(gameId);
-  publishGameResult(currentGame);
   render();
 };
 
