@@ -224,6 +224,7 @@ const AVATARS = ['#6366f1','#8b5cf6','#ec4899','#ef4444','#f97316','#eab308','#2
 // ── Runtime globals ───────────────────────────────────────────────────────────
 const CONTEXT          = window.__CONTEXT_URL    ?? '';
 const DB_URL           = window.__DB_URL         ?? '';
+const CREATE_URL       = DB_URL.replace('api/db', 'api/game/create');
 const FIRE_URL         = DB_URL.replace('api/db', 'api/game/fire');
 const PLACE_FLEET_URL  = DB_URL.replace('api/db', 'api/game/place-fleet');
 const RESIGN_URL       = DB_URL.replace('api/db', 'api/game/resign');
@@ -435,17 +436,23 @@ async function loadGameDetail(gameId) {
 async function createGame(opponentId) {
   const opp = members.find(m => m.id === opponentId);
   if (!opp || !me) return;
-  const gameId = uid();
-  const now = new Date().toISOString();
-  await db(
-    `INSERT INTO app_sea_battle__sea_battle_games
-     (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, 'pending_challenger', ?, ?, ?)`,
-    [gameId, me.id, me.name, opp.id, opp.name, me.id, now, now]
-  );
+  // Game rows are endpoint_writes_only — creation goes through the trusted
+  // api/game/create endpoint so challenger identity can't be forged and the
+  // game's lifecycle/result columns can't be written directly via api/db.
+  const res = await fetch(CREATE_URL, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ opponentId }),
+  });
+  if (!res.ok) {
+    console.error('Create game failed:', await res.json().catch(() => ({})));
+    return;
+  }
+  const game = await res.json();
   await loadGames();
   closeModal();
-  await openGame(gameId);
+  await openGame(game.id);
 }
 
 async function placeFleet(gameId) {

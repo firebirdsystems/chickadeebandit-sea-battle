@@ -1,7 +1,7 @@
 {
   "id": "sea-battle",
   "name": "Sea Battle",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Async turn-based naval grid game — challenge a family member, place your fleet, and fire away.",
   "entrypoint": "index.html",
   "runtime": "static",
@@ -27,15 +27,18 @@
     "sea_battle_games": {
       "kind": "party_scoped",
       "member_columns": ["challenger_id", "opponent_id"],
-      "self_column": "challenger_id"
+      "self_column": "challenger_id",
+      "endpoint_writes_only": true
     },
     "sea_battle_ships": {
       "kind": "party_scoped",
-      "member_columns": ["owner_id"]
+      "member_columns": ["owner_id"],
+      "endpoint_writes_only": true
     },
     "sea_battle_shots": {
       "kind": "party_scoped",
-      "member_columns": ["shooter_id", "target_player_id"]
+      "member_columns": ["shooter_id", "target_player_id"],
+      "endpoint_writes_only": true
     }
   }
 }
