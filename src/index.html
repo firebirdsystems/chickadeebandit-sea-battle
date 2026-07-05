@@ -515,6 +515,23 @@ async function fireAt(gameId, row, col) {
   if (won) {
     notify('🏆 You Win!',  `You sank ${oppName}'s last ship!`, me.id, gameId);
     notify('💥 Game Over', `${me.name} sank your last ship. Better luck next time!`, oppId, gameId);
+    // Feed the leaderboard: a 1v1 game.completed result (winner = me, loser = opponent).
+    fetch(EVENTS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source_app_id: APP_ID,
+        type: 'game.completed',
+        subject_id: gameId,
+        payload: {
+          game_type: '1v1',
+          category_name: 'Sea Battle',
+          category_icon: '⚓',
+          winner_id: me.id,
+          loser_id: oppId,
+        },
+      }),
+    }).catch(() => {});
   } else {
     // Signal the opponent via SSE that it's their turn
     fetch(EVENTS_URL, {
