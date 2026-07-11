@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS app_sea_battle__sea_battle_games (
+CREATE TABLE IF NOT EXISTS app_sea_battle__games (
   id            TEXT    NOT NULL,
   challenger_id   TEXT  NOT NULL,
   challenger_name TEXT  NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS app_sea_battle__sea_battle_games (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS app_sea_battle__sea_battle_ships (
+CREATE TABLE IF NOT EXISTS app_sea_battle__ships (
   id           TEXT    NOT NULL,
   game_id      TEXT    NOT NULL,
   owner_id     TEXT    NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS app_sea_battle__sea_battle_ships (
   PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS app_sea_battle__sea_battle_shots (
+CREATE TABLE IF NOT EXISTS app_sea_battle__shots (
   id               TEXT    NOT NULL,
   game_id          TEXT    NOT NULL,
   shooter_id       TEXT    NOT NULL,
