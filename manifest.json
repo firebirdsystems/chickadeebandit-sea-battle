@@ -1,5 +1,6 @@
 {
   "id": "sea-battle",
+  "contexts": ["household", "shared_space"],
   "name": "Sea Battle",
   "version": "1.0.0",
   "description": "Async turn-based naval grid game — challenge a family member, place your fleet, and fire away.",
