@@ -22,6 +22,44 @@
   "resource_limits": {
     "max_db_bytes": 52428800
   },
+    "member_references": {
+      "games": [
+        {
+          "column": "challenger_id",
+          "on_removed": "keep"
+        },
+        {
+          "column": "opponent_id",
+          "on_removed": "keep"
+        },
+        {
+          "column": "current_turn_id",
+          "on_removed": "keep"
+        },
+        {
+          "column": "winner_id",
+          "on_removed": "keep"
+        },
+        {
+          "column": "resigned_by_id",
+          "on_removed": "keep"
+        }
+      ],
+      "ships": {
+        "column": "owner_id",
+        "on_removed": "keep"
+      },
+      "shots": [
+        {
+          "column": "shooter_id",
+          "on_removed": "keep"
+        },
+        {
+          "column": "target_player_id",
+          "on_removed": "keep"
+        }
+      ]
+    },
   "nav": { "label": "Sea Battle" },
   "publishes": ["sea-battle.game-started", "sea-battle.move-fired", "game.completed"],
   "alert_on": ["sea-battle.game-started", "game.completed"],
@@ -30,7 +68,16 @@
       "kind": "party_scoped",
       "member_columns": ["challenger_id", "opponent_id"],
       "self_column": "challenger_id",
-      "endpoint_writes_only": true
+      "endpoint_writes_only": true,
+      "retain_days": {
+        "default": 365,
+        "timestamp_column": "updated_at",
+        "override_key": "game_history",
+        "dependent_tables": [
+          { "table": "ships", "foreign_key": "game_id" },
+          { "table": "shots", "foreign_key": "game_id" }
+        ]
+      }
     },
     "ships": {
       "kind": "party_scoped",

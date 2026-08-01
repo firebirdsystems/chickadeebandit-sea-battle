@@ -228,6 +228,7 @@ const CREATE_URL       = DB_URL.replace('api/db', 'api/game/create');
 const FIRE_URL         = DB_URL.replace('api/db', 'api/game/fire');
 const PLACE_FLEET_URL  = DB_URL.replace('api/db', 'api/game/place-fleet');
 const RESIGN_URL       = DB_URL.replace('api/db', 'api/game/resign');
+const ABANDON_URL      = DB_URL.replace('api/db', 'api/game/abandon');
 const SHIPS_URL        = DB_URL.replace('api/db', 'api/game/ships');
 const EVENTS_URL       = window.__EVENTS_URL     ?? '/api/events';
 const STREAM_URL       = window.__STREAM_URL     ?? '';
@@ -577,17 +578,53 @@ function goHome() {
 }
 
 // ── Resign ────────────────────────────────────────────────────────────────────
+// A game whose opponent has left the household has no other exit: only the two
+// parties can see it (party_scoped), and resigning is the only endpoint that
+// ends it. Resign still works and still records the departed player as the
+// winner — game rows are kept on member removal, so the result stays a real
+// record — but the confirmation says so rather than implying a live opponent is
+// being handed a victory.
+function opponentOnRoster(game) {
+  const otherId = game.challenger_id === me?.id ? game.opponent_id : game.challenger_id;
+  return members.some((m) => m.id === otherId);
+}
+
 function resign(gameId) {
+  const departed = currentGame && currentGame.id === gameId && !opponentOnRoster(currentGame);
   openModal(`
-    <h3 style="margin-bottom:12px">🏳️ Resign Game?</h3>
+    <h3 style="margin-bottom:12px">${departed ? '🏁 End Game?' : '🏳️ Resign Game?'}</h3>
     <p style="color:var(--muted);font-size:0.9rem;margin-bottom:20px">
-      This will end the game and hand victory to your opponent.
+      ${departed
+        ? 'Your opponent is no longer in this household, so this game cannot be finished. Ending it closes the game with no winner.'
+        : 'This will end the game and hand victory to your opponent.'}
     </p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmResign('${esc(gameId)}')">Resign</button>
+      <button class="btn btn-danger" onclick="${departed ? 'confirmAbandon' : 'confirmResign'}('${esc(gameId)}')">${departed ? 'End game' : 'Resign'}</button>
     </div>`);
 }
+
+// No winner, and no game.completed event: resigning would have named a departed
+// member the winner and fed that to any leaderboard listening.
+window.confirmAbandon = async function(gameId) {
+  closeModal();
+  const g = currentGame;
+  if (!g || !me) return;
+  const res = await fetch(ABANDON_URL, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId }),
+  });
+  if (!res.ok) {
+    console.error('Abandon failed:', await res.json().catch(() => ({})));
+    return;
+  }
+  const { abandoned_at, updated_at } = await res.json();
+  currentGame = { ...g, status: 'complete', current_turn_id: null, winner_id: null, winner_name: null, abandoned_at, updated_at };
+  stopWatching();
+  render();
+};
 
 window.confirmResign = async function(gameId) {
   closeModal();
@@ -822,7 +859,7 @@ function renderWaiting(oppName) {
       <h2 style="margin-bottom:8px">Fleet Deployed!</h2>
       <p style="color:var(--muted)">Waiting for ${esc(oppName)} to place their fleet…</p>
       <button class="btn btn-secondary" style="margin-top:24px" onclick="refreshGame()">↻ Refresh</button>
-      <button class="btn btn-danger" style="margin-top:10px" onclick="resign('${esc(currentGame.id)}')">🏳️ Resign</button>
+      <button class="btn btn-danger" style="margin-top:10px" onclick="resign('${esc(currentGame.id)}')">${opponentOnRoster(currentGame) ? '🏳️ Resign' : '🏳️ End game'}</button>
     </div>`;
 }
 
@@ -869,7 +906,7 @@ function renderActiveGame() {
       </div>
     </div>
     <div style="margin-top:16px;text-align:center">
-      <button class="btn btn-secondary btn-sm" onclick="resign('${esc(g.id)}')">🏳️ Resign</button>
+      <button class="btn btn-secondary btn-sm" onclick="resign('${esc(g.id)}')">${opponentOnRoster(g) ? '🏳️ Resign' : '🏳️ End game'}</button>
     </div>`;
 }
 
@@ -880,8 +917,11 @@ function renderComplete() {
   const iWon      = g.winner_id === me?.id;
   const iResigned = g.resigned_by_id === me?.id;
   const oppResigned = g.resigned_by_id && g.resigned_by_id !== me?.id;
+  // Closed with no winner because the opponent left the household.
+  const abandoned = !!g.abandoned_at;
 
-  const bannerMsg = iResigned    ? `You resigned. ${esc(oppName)} wins.`
+  const bannerMsg = abandoned    ? `${esc(oppName)} is no longer in this household, so the game was ended with no winner.`
+                  : iResigned    ? `You resigned. ${esc(oppName)} wins.`
                   : oppResigned  ? `${esc(oppName)} resigned. You win!`
                   : iWon         ? `You sank ${esc(oppName)}'s entire fleet!`
                   :                `${esc(g.winner_name)} sank your last ship.`;
@@ -891,8 +931,8 @@ function renderComplete() {
 
   document.getElementById('app').innerHTML = `
     <button class="back" onclick="goHome()">‹ All Games</button>
-    <div class="banner ${iWon && !iResigned ? 'win' : 'lose'}">
-      <h2>${iWon && !iResigned ? '🏆 Victory!' : iResigned ? '🏳️ Resigned' : '⚓ Defeated'}</h2>
+    <div class="banner ${!abandoned && iWon && !iResigned ? 'win' : 'lose'}">
+      <h2>${abandoned ? '🏁 Game Ended' : iWon && !iResigned ? '🏆 Victory!' : iResigned ? '🏳️ Resigned' : '⚓ Defeated'}</h2>
       <p>${bannerMsg}</p>
     </div>
     <div class="panels">
