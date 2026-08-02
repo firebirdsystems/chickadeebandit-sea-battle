@@ -60,6 +60,13 @@
         }
       ]
     },
+  "glance": {
+    "source": {
+      "kind": "sql",
+      "query": "SELECT COUNT(*) AS n FROM app_sea_battle__games WHERE current_turn_id = :me AND status <> 'complete' AND abandoned_at IS NULL LIMIT 1"
+    },
+    "display": { "template": "badge", "count": "n", "label": "games waiting on your move", "severity": "info" }
+  },
   "nav": { "label": "Sea Battle" },
   "publishes": ["sea-battle.game-started", "sea-battle.move-fired", "game.completed"],
   "alert_on": ["sea-battle.game-started", "game.completed"],
