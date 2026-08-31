@@ -1,0 +1,129 @@
+{
+  "scenarios": [
+    {
+      "name": "the opponent's fleet is absent from the board until the game completes, then the reveal releases it",
+      "members": {
+        "challenger": "adult",
+        "opponent": "adult"
+      },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES ('sb-game', ?, ?, ?, ?, 'challenger_turn', ?, '2026-08-01T09:00:00Z', '2026-08-01T09:00:00Z')",
+          "params": [
+            "{{challenger}}",
+            "Cass Challenger",
+            "{{opponent}}",
+            "Ola Opponent",
+            "{{challenger}}"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES ('sb-ship-mine', 'sb-game', ?, ?, 2, ?)",
+          "params": [
+            "{{challenger}}",
+            "destroyer",
+            "[{\"row\":0,\"col\":0},{\"row\":0,\"col\":1}]"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES ('sb-ship-theirs', 'sb-game', ?, ?, 2, ?)",
+          "params": [
+            "{{opponent}}",
+            "destroyer",
+            "[{\"row\":5,\"col\":5},{\"row\":5,\"col\":6}]"
+          ]
+        },
+        {
+          "action": "open",
+          "as": "challenger"
+        },
+        {
+          "action": "expectVisible",
+          "as": "challenger",
+          "selector": "[data-testid=\"game-card\"][data-game-id=\"sb-game\"]"
+        },
+        {
+          "action": "click",
+          "as": "challenger",
+          "selector": "[data-testid=\"game-card\"][data-game-id=\"sb-game\"]"
+        },
+        {
+          "action": "expectVisible",
+          "as": "challenger",
+          "selector": "[data-testid=\"enemy-grid\"]"
+        },
+        {
+          "action": "expectCount",
+          "as": "challenger",
+          "selector": "[data-testid=\"my-grid\"] [data-testid=\"grid-cell\"][data-state=\"ship\"]",
+          "count": 2
+        },
+        {
+          "action": "expectCount",
+          "as": "challenger",
+          "selector": "[data-testid=\"enemy-grid\"] [data-testid=\"grid-cell\"][data-r=\"5\"][data-c=\"5\"][data-state=\"open\"]",
+          "count": 1
+        },
+        {
+          "action": "expectCount",
+          "as": "challenger",
+          "selector": "[data-testid=\"enemy-grid\"] [data-testid=\"grid-cell\"][data-state=\"reveal\"]",
+          "count": 0
+        },
+        {
+          "action": "expectCount",
+          "as": "challenger",
+          "selector": "[data-testid=\"enemy-grid\"] [data-testid=\"grid-cell\"][data-r=\"5\"][data-c=\"5\"][data-state=\"reveal\"]",
+          "count": 0
+        },
+        {
+          "action": "seedRaw",
+          "sql": "UPDATE app_sea_battle__games SET status = 'complete', winner_id = ?, winner_name = ?, updated_at = '2026-08-01T12:00:00Z' WHERE id = 'sb-game'",
+          "params": [
+            "{{challenger}}",
+            "Cass Challenger"
+          ]
+        },
+        {
+          "action": "reload",
+          "as": "challenger"
+        },
+        {
+          "action": "expectVisible",
+          "as": "challenger",
+          "selector": "[data-testid=\"game-card\"][data-game-id=\"sb-game\"]"
+        },
+        {
+          "action": "click",
+          "as": "challenger",
+          "selector": "[data-testid=\"game-card\"][data-game-id=\"sb-game\"]"
+        },
+        {
+          "action": "expectVisible",
+          "as": "challenger",
+          "selector": "[data-testid=\"reveal-toggle\"]"
+        },
+        {
+          "action": "click",
+          "as": "challenger",
+          "selector": "[data-testid=\"reveal-toggle\"]"
+        },
+        {
+          "action": "expectCount",
+          "as": "challenger",
+          "selector": "[data-testid=\"enemy-grid\"] [data-testid=\"grid-cell\"][data-state=\"reveal\"]",
+          "count": 2
+        },
+        {
+          "action": "expectCount",
+          "as": "challenger",
+          "selector": "[data-testid=\"enemy-grid\"] [data-testid=\"grid-cell\"][data-r=\"5\"][data-c=\"5\"][data-state=\"reveal\"]",
+          "count": 1
+        }
+      ]
+    }
+  ]
+}
