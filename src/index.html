@@ -26,7 +26,7 @@
       --ship-bd:    #1e293b;
       --hit-bg:     #dc2626;
       --hit-bd:     #b91c1c;
-      --miss-bg:    #f8fafc;
+      --miss-bg:    var(--bg);
       --miss-bd:    #cbd5e1;
       --sunk-bg:    #7f1d1d;
       --sunk-bd:    #991b1b;
@@ -138,8 +138,8 @@
       display: flex; align-items: center; gap: 8px; padding: 8px 12px;
       border-radius: var(--radius); font-size: 0.85rem; font-weight: 600; margin-bottom: 12px;
     }
-    .shot-result.hit  { background: #fee2e2; color: #991b1b; }
-    .shot-result.miss { background: #f1f5f9; color: var(--muted); }
+    .shot-result.hit  { background: var(--hub-tint-danger, #fee2e2); color: var(--hub-tint-danger-fg, #991b1b); }
+    .shot-result.miss { background: var(--bg); color: var(--muted); }
     .shot-result.sunk { background: #450a0a; color: #fca5a5; }
 
     /* ── Setup: ship palette ── */
@@ -149,7 +149,7 @@
       border: 2px solid var(--border); border-radius: var(--radius);
       background: var(--surface); font-size: 0.8rem;
     }
-    .ship-opt.next  { border-color: var(--accent); background: #eff6ff; font-weight: 700; }
+    .ship-opt.next  { border-color: var(--accent); background: var(--hub-tint-info, #eff6ff); font-weight: 700; }
     .ship-opt.done  { opacity: 0.4; border-style: dashed; }
     .sblocks { display: flex; gap: 2px; }
     .sblock  { width: 10px; height: 10px; background: var(--ship-bg); border-radius: 2px; }
@@ -176,7 +176,7 @@
       border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer;
     }
     .member-item:hover { border-color: var(--accent); }
-    .member-item.sel   { border-color: var(--accent); background: #eff6ff; }
+    .member-item.sel   { border-color: var(--accent); background: var(--hub-tint-info, #eff6ff); }
     .avatar {
       width: 32px; height: 32px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
