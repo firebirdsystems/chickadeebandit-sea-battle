@@ -10,6 +10,9 @@
   "tags": ["games", "kids", "strategy", "turn-based"],
   "icon": "⚓",
   "storage": "db",
+  "preload": {
+    "games": {"sql": "SELECT * FROM app_sea_battle__games WHERE (challenger_id = ? OR opponent_id = ?) ORDER BY updated_at DESC", "params": [":me", ":me"]}
+  },
   "db_encryption": "off",
   "data_access": {
     "reads": ["family.members"],
