@@ -208,7 +208,9 @@
   <div style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--muted)">Loading…</div>
 </div>
 
-<script>
+<script type="module">
+import { glyph, chickadee } from "/hub-sdk.js";
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 const GRID  = 10;
 const COLS  = ['A','B','C','D','E','F','G','H','I','J'];
@@ -592,7 +594,7 @@ function opponentOnRoster(game) {
 function resign(gameId) {
   const departed = currentGame && currentGame.id === gameId && !opponentOnRoster(currentGame);
   openModal(`
-    <h3 style="margin-bottom:12px">${departed ? '🏁 End Game?' : '🏳️ Resign Game?'}</h3>
+    <h3 style="margin-bottom:12px">${glyph('flag')} ${departed ? 'End Game?' : 'Resign Game?'}</h3>
     <p style="color:var(--muted);font-size:0.9rem;margin-bottom:20px">
       ${departed
         ? 'Your opponent is no longer in this household, so this game cannot be finished. Ending it closes the game with no winner.'
@@ -672,7 +674,7 @@ function openNewGame() {
       <span style="font-weight:600;font-size:0.9rem">${esc(m.name)}</span>
     </div>`).join('');
   openModal(`
-    <h2>⚓ New Game</h2>
+    <h2>${glyph('anchor')} New Game</h2>
     <p style="font-size:0.83rem;color:var(--muted);margin-bottom:12px">Challenge a family member</p>
     <div class="member-list">${items}</div>
     <div class="modal-actions">
@@ -792,7 +794,7 @@ function renderHome() {
     else if (g.status === 'challenger_turn' || g.status === 'opponent_turn')
       st = mine ? 'Your turn — fire!' : `Waiting for ${esc(opp)} to fire`;
     else
-      st = g.winner_id === me?.id ? '🏆 You won!' : `${esc(g.winner_name)} won`;
+      st = g.winner_id === me?.id ? `${glyph('trophy')} You won!` : `${esc(g.winner_name)} won`;
     const urgent = mine && g.status !== 'complete';
     return `
       <div class="game-card ${urgent ? 'urgent' : ''}" data-testid="game-card" data-game-id="${esc(g.id)}" onclick="openGame('${esc(g.id)}')">
@@ -808,13 +810,13 @@ function renderHome() {
 
   document.getElementById('app').innerHTML = `
     <div class="hdr">
-      <div><h1>⚓ Sea Battle</h1><div class="sub">Async naval strategy for the family</div></div>
+      <div><h1>${glyph('anchor')} Sea Battle</h1><div class="sub">Async naval strategy for the family</div></div>
       <button class="btn btn-primary" onclick="openNewGame()">+ New Game</button>
     </div>
     ${s('Your Turn', myTurn)}
     ${s('Waiting', waiting)}
     ${s('Completed', done.slice(0,10))}
-    ${!games.length ? `<div class="empty"><div class="icon">⚓</div><p>No games yet.</p><p style="margin-top:6px">Challenge a family member to start!</p></div>` : ''}`;
+    ${!games.length ? `<div class="empty"><div class="icon">${chickadee('nest', { size: 72 })}</div><p>No games yet.</p><p style="margin-top:6px">Challenge a family member to start!</p></div>` : ''}`;
 }
 
 function renderSetup() {
@@ -828,7 +830,7 @@ function renderSetup() {
     return `<div class="ship-opt ${done?'done':''} ${next?'next':''}">
       <div class="sblocks">${blocks}</div>
       <span>${esc(s.label)}</span>
-      ${done ? '<span style="color:#22c55e">✓</span>' : ''}
+      ${done ? `<span style="color:#22c55e">${glyph('tick')}</span>` : ''}
     </div>`;
   }).join('');
   const allPlaced = !remaining.length;
@@ -836,7 +838,7 @@ function renderSetup() {
   document.getElementById('app').innerHTML = `
     <button class="back" onclick="goHome()">‹ All Games</button>
     <div class="hdr" style="margin-bottom:10px">
-      <div><h1>⚓ Place Your Fleet</h1><div class="sub">vs. ${esc(oppName)}</div></div>
+      <div><h1>${glyph('anchor')} Place Your Fleet</h1><div class="sub">vs. ${esc(oppName)}</div></div>
     </div>
     <div class="setup-ctrl">
       <button class="btn btn-secondary btn-sm" onclick="toggleDir()">
@@ -848,7 +850,7 @@ function renderSetup() {
     ${remaining[0] ? `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:8px">Placing: ${esc(remaining[0].label)} (${remaining[0].size} cells) — hover to preview, click to place</p>` : ''}
     <div style="margin-bottom:14px">${renderSetupGrid()}</div>
     <button class="btn btn-primary" id="ready-btn" ${allPlaced?'':'disabled'} onclick="submitFleet()">
-      ${allPlaced ? '🚀 Ready to Battle!' : `Place all ships (${setupShips.length}/${SHIPS.length})`}
+      ${allPlaced ? `${glyph('flag', { accent: 'currentColor' })} Ready to Battle!` : `Place all ships (${setupShips.length}/${SHIPS.length})`}
     </button>`;
 }
 
@@ -856,11 +858,11 @@ function renderWaiting(oppName) {
   document.getElementById('app').innerHTML = `
     <button class="back" onclick="goHome()">‹ All Games</button>
     <div style="text-align:center;padding:48px 20px">
-      <div style="font-size:2.8rem;margin-bottom:14px">⏳</div>
+      <div style="margin-bottom:14px">${chickadee('waiting', { size: 80 })}</div>
       <h2 style="margin-bottom:8px">Fleet Deployed!</h2>
       <p style="color:var(--muted)">Waiting for ${esc(oppName)} to place their fleet…</p>
       <button class="btn btn-secondary" style="margin-top:24px" onclick="refreshGame()">↻ Refresh</button>
-      <button class="btn btn-danger" style="margin-top:10px" onclick="resign('${esc(currentGame.id)}')">${opponentOnRoster(currentGame) ? '🏳️ Resign' : '🏳️ End game'}</button>
+      <button class="btn btn-danger" style="margin-top:10px" onclick="resign('${esc(currentGame.id)}')">${glyph('flag', { accent: 'currentColor' })} ${opponentOnRoster(currentGame) ? 'Resign' : 'End game'}</button>
     </div>`;
 }
 
@@ -878,8 +880,8 @@ function renderActiveGame() {
   });
 
   const badge = isMyTurn
-    ? `<span class="badge my">🎯 Your Turn!</span>`
-    : `<span class="badge wait">⏳ ${esc(oppName)}'s Turn</span>`;
+    ? `<span class="badge my">${glyph('goal-ring', { accent: 'currentColor' })} Your Turn!</span>`
+    : `<span class="badge wait">${glyph('hourglass', { accent: 'currentColor' })} ${esc(oppName)}'s Turn</span>`;
 
   const last = myShots[myShots.length-1];
   let lastHtml = '';
@@ -902,13 +904,13 @@ function renderActiveGame() {
         ${myGrid}
       </div>
       <div>
-        <div class="panel-title">${isMyTurn ? '🎯 Attack!' : `${esc(oppName)}'s Waters`}</div>
+        <div class="panel-title">${isMyTurn ? `${glyph('goal-ring')} Attack!` : `${esc(oppName)}'s Waters`}</div>
         ${oppGrid}
         ${isMyTurn ? `<p style="font-size:0.73rem;color:var(--muted);margin-top:5px">Click a cell to fire</p>` : ''}
       </div>
     </div>
     <div style="margin-top:16px;text-align:center">
-      <button class="btn btn-secondary btn-sm" onclick="resign('${esc(g.id)}')">${opponentOnRoster(g) ? '🏳️ Resign' : '🏳️ End game'}</button>
+      <button class="btn btn-secondary btn-sm" onclick="resign('${esc(g.id)}')">${glyph('flag')} ${opponentOnRoster(g) ? 'Resign' : 'End game'}</button>
     </div>`;
 }
 
@@ -934,7 +936,7 @@ function renderComplete() {
   document.getElementById('app').innerHTML = `
     <button class="back" onclick="goHome()">‹ All Games</button>
     <div class="banner ${!abandoned && iWon && !iResigned ? 'win' : 'lose'}">
-      <h2>${abandoned ? '🏁 Game Ended' : iWon && !iResigned ? '🏆 Victory!' : iResigned ? '🏳️ Resigned' : '⚓ Defeated'}</h2>
+      <h2>${abandoned ? `${glyph('flag')} Game Ended` : iWon && !iResigned ? `${glyph('trophy')} Victory!` : iResigned ? `${glyph('flag')} Resigned` : `${glyph('anchor')} Defeated`}</h2>
       <p>${bannerMsg}</p>
     </div>
     <div class="panels">
@@ -946,7 +948,7 @@ function renderComplete() {
         <div class="panel-title">${esc(oppName)}'s Waters</div>
         ${oppGrid}
         <button class="btn btn-secondary btn-sm" data-testid="reveal-toggle" style="margin-top:8px" onclick="toggleReveal()">
-          ${revealOpp ? '🙈 Hide Fleet' : '👁 Reveal Fleet'}
+          ${glyph("eye")} ${revealOpp ? 'Hide Fleet' : 'Reveal Fleet'}
         </button>
       </div>
     </div>
@@ -1021,6 +1023,10 @@ window.refreshGame = async function() {
 
 window.toggleReveal = function() { revealOpp = !revealOpp; renderComplete(); };
 window.resign = function(gameId) { resign(gameId); };
+window.closeModal = closeModal;
+window.goHome = goHome;
+window.openGame = openGame;
+window.openNewGame = openNewGame;
 
 // ── Visibility-based watch mode ───────────────────────────────────────────────
 document.addEventListener('visibilitychange', () => {
