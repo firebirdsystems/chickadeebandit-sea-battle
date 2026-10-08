@@ -21,9 +21,15 @@
       --font:    var(--hub-font,        -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
 
       --ocean:      #bfdbf7;
+      --ocean-deep: #9cc8f2;
       --ocean-line: #93c5fd;
-      --ship-bg:    #334155;
+      --ship-bg:    #475569;
       --ship-bd:    #1e293b;
+      --ship-dk:    #64748b;
+      --ship-det:   #a8b5c6;
+      --cell:       30px;
+      --lab:        22px;
+      --labh:       18px;
       --hit-bg:     #dc2626;
       --hit-bd:     #b91c1c;
       --miss-bg:    var(--bg);
@@ -42,7 +48,10 @@
       min-height: 100vh;
     }
 
-    #app { max-width: 700px; margin: 0 auto; padding: 16px; }
+    #app { max-width: 1240px; margin: 0 auto; padding: 16px; }
+    .narrow { max-width: 700px; margin: 0 auto; }
+    /* Game views shrink-wrap the boards so the header lines up with them. */
+    .stage { width: fit-content; max-width: 100%; margin: 0 auto; }
 
     /* ── Header ── */
     .hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -56,6 +65,7 @@
     .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover { background: var(--bg); }
+    .btn-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
     .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
 
     /* ── Game list cards ── */
@@ -76,48 +86,86 @@
            letter-spacing: 0.06em; color: var(--muted); margin: 18px 0 6px; }
 
     /* ── Grid ── */
-    .grid-wrap { display: flex; flex-direction: column; align-items: flex-start; }
-    .grid-col-row { display: flex; margin-left: 26px; }
-    .gcl { width: 30px; height: 18px; display: flex; align-items: center;
+    /* Every board dimension derives from --cell, which the layout containers
+       (.panels, .setup-layout) size from the window. */
+    .grid-wrap { display: flex; flex-direction: column; align-items: flex-start; position: relative; isolation: isolate; }
+    .grid-col-row { display: flex; margin-left: var(--lab); }
+    .gcl { width: var(--cell); height: var(--labh); display: flex; align-items: center;
            justify-content: center; font-size: 0.68rem; color: var(--muted); font-weight: 600; }
     .grid-row { display: flex; align-items: center; }
-    .grl { width: 26px; height: 30px; display: flex; align-items: center;
+    .grl { width: var(--lab); height: var(--cell); display: flex; align-items: center;
            justify-content: center; font-size: 0.68rem; color: var(--muted); font-weight: 600; }
+    .sea, .ships-layer {
+      position: absolute; left: var(--lab); top: var(--labh);
+      width: calc(var(--cell) * 10); height: calc(var(--cell) * 10);
+    }
+    .sea { z-index: -1; border-radius: 4px; background: linear-gradient(160deg, var(--ocean) 0%, var(--ocean-deep) 100%); }
+    .ships-layer { z-index: 1; pointer-events: none; overflow: hidden; }
     .gc {
-      width: 30px; height: 30px;
+      width: var(--cell); height: var(--cell);
       border-right: 1px solid var(--ocean-line); border-bottom: 1px solid var(--ocean-line);
-      background: var(--ocean);
       display: flex; align-items: center; justify-content: center;
       position: relative; cursor: default;
     }
-    .grid-row:first-of-type .gc { border-top: 1px solid var(--ocean-line); }
+    .grid-col-row + .grid-row .gc { border-top: 1px solid var(--ocean-line); }
     .gc:first-of-type { border-left: 1px solid var(--ocean-line); }
-    .gc.ship  { background: var(--ship-bg); border-color: var(--ship-bd); }
-    .gc.hit   { background: var(--hit-bg);  border-color: var(--hit-bd); }
-    .gc.hit::after   { content: '✕'; color: #fff; font-size: 13px; font-weight: 700; }
-    .gc.miss  { background: var(--miss-bg); border-color: var(--miss-bd); }
-    .gc.miss::after  { content: '·'; color: var(--muted); font-size: 22px; line-height: 1; }
-    .gc.sunk  { background: var(--sunk-bg); border-color: var(--sunk-bd); }
-    .gc.sunk::after  { content: '✕'; color: #fca5a5; font-size: 13px; font-weight: 700; }
-    .gc.reveal { background: var(--reveal-bg); border-color: #334155; opacity: 0.65; }
+    /* Shot markers sit above the ship silhouettes. */
+    .gc.hit, .gc.miss, .gc.sunk { z-index: 2; }
+    .gc.hit, .gc.sunk { background: rgba(220, 38, 38, 0.3); }
+    .gc.sunk { background: rgba(127, 29, 29, 0.5); }
+    .gc.hit::after, .gc.sunk::after, .gc.miss::after { content: ''; border-radius: 50%; }
+    .gc.hit::after {
+      width: 46%; height: 46%;
+      background: radial-gradient(circle at 35% 35%, #fecaca, var(--hit-bg) 60%, var(--hit-bd));
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.85), 0 1px 3px rgba(0,0,0,0.4);
+    }
+    .gc.sunk::after {
+      width: 46%; height: 46%;
+      background: radial-gradient(circle at 35% 35%, #f87171, var(--sunk-bg) 65%);
+      box-shadow: 0 0 0 2px #fca5a5, 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .gc.miss::after {
+      width: 34%; height: 34%;
+      border: 2px solid rgba(255,255,255,0.95);
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+    }
     .gc.shootable { cursor: crosshair; }
-    .gc.shootable:hover { background: #7dd3fc; }
+    .gc.shootable:hover { background: rgba(255,255,255,0.5); }
+    .gc.placed { cursor: pointer; }
     .gc.pok   { background: var(--place-ok);  cursor: crosshair; }
     .gc.pbad  { background: var(--place-bad); cursor: not-allowed; }
 
-    @media (min-width: 560px) {
-      .gcl { width: 34px; }
-      .grl { height: 34px; }
-      .gc  { width: 34px; height: 34px; }
-    }
+    /* ── Ships (top-down silhouettes, one element per ship) ── */
+    .ship-el { position: absolute; filter: drop-shadow(0 1px 1.5px rgba(0,0,0,0.35)); transition: transform 0.12s; }
+    .ship-el svg, .tray-sil svg { display: block; width: 100%; height: 100%; }
+    .sh-hull { fill: var(--ship-bg); stroke: var(--ship-bd); stroke-width: 4; stroke-linejoin: round; }
+    .sh-dk   { fill: var(--ship-dk); }
+    .sh-det  { fill: var(--ship-det); stroke: var(--ship-bd); stroke-width: 3; }
+    .sh-gun  { stroke: var(--ship-bd); stroke-width: 7; stroke-linecap: round; }
+    .sh-line { stroke: rgba(255,255,255,0.7); stroke-width: 3; fill: none; }
+    .ship-el.sunk   { --ship-bg: #7f1d1d; --ship-bd: #450a0a; --ship-dk: #991b1b; --ship-det: #b91c1c; }
+    .ship-el.reveal { opacity: 0.8; }
+    .ship-el.lift   { transform: scale(1.04); filter: drop-shadow(0 0 5px var(--accent)); }
+    .ship-el.ghost  { opacity: 0.8; filter: none; }
+    .ship-el.ghost.ok  { --ship-bg: #22c55e; --ship-bd: #166534; --ship-dk: #16a34a; --ship-det: #bbf7d0; }
+    .ship-el.ghost.bad { --ship-bg: #ef4444; --ship-bd: #991b1b; --ship-dk: #dc2626; --ship-det: #fecaca; }
 
     /* ── Two-panel game layout ── */
-    .panels { display: flex; flex-direction: column; gap: 20px; }
+    .panels {
+      display: flex; flex-direction: column; gap: 20px;
+      --cell: clamp(26px, calc((100vw - 56px) / 10), 46px);
+    }
     .panel-title {
       font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.04em; color: var(--muted); margin-bottom: 8px;
     }
-    @media (min-width: 560px) { .panels { flex-direction: row; } }
+    @media (min-width: 640px) {
+      /* Two boards share the width; the height term keeps both on screen. */
+      .panels {
+        flex-direction: row; gap: 24px;
+        --cell: clamp(26px, min(calc((min(100vw, 1240px) - 102px) / 20), calc((100vh - 240px) / 10)), 56px);
+      }
+    }
 
     /* ── Status bar ── */
     .status-bar {
@@ -142,20 +190,46 @@
     .shot-result.miss { background: var(--bg); color: var(--muted); }
     .shot-result.sunk { background: #450a0a; color: #fca5a5; }
 
-    /* ── Setup: ship palette ── */
-    .palette { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-    .ship-opt {
-      display: flex; align-items: center; gap: 6px; padding: 7px 11px;
-      border: 2px solid var(--border); border-radius: var(--radius);
-      background: var(--surface); font-size: 0.8rem;
+    /* ── Setup: board + ship tray ── */
+    .setup-layout {
+      display: grid; gap: 12px; grid-template-areas: "side" "board" "go";
+      --cell: clamp(26px, calc((100vw - 56px) / 10), 46px);
     }
-    .ship-opt.next  { border-color: var(--accent); background: var(--hub-tint-info, #eff6ff); font-weight: 700; }
-    .ship-opt.done  { opacity: 0.4; border-style: dashed; }
-    .sblocks { display: flex; gap: 2px; }
-    .sblock  { width: 10px; height: 10px; background: var(--ship-bg); border-radius: 2px; }
-
-    /* ── Setup controls ── */
-    .setup-ctrl { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+    .setup-side  { grid-area: side; min-width: 0; }
+    .setup-board { grid-area: board; }
+    .setup-go    { grid-area: go; }
+    .tray { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .ship-opt {
+      display: flex; align-items: center; gap: 10px; padding: 7px 11px;
+      border: 2px solid var(--border); border-radius: var(--radius);
+      background: var(--surface); color: var(--text); font: inherit; font-size: 0.8rem;
+      text-align: left; cursor: pointer;
+    }
+    .ship-opt:hover { border-color: var(--accent); }
+    .ship-opt.sel   { border-color: var(--accent); background: var(--hub-tint-info, #eff6ff); }
+    .ship-opt.done  { border-style: dashed; }
+    .ship-opt.done .tray-sil { opacity: 0.35; }
+    .tray-sil { --u: 16px; display: flex; align-items: center; flex-shrink: 0; }
+    .tray-sil .h { display: block; width: calc(var(--u) * var(--n)); height: var(--u); }
+    .tray-sil .v { display: none;  width: var(--u); height: calc(var(--u) * var(--n)); }
+    .tray-txt { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+    .tray-txt b { font-weight: 600; }
+    .tray-txt small { display: none; font-size: 0.72rem; color: var(--muted); }
+    .setup-hint { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; line-height: 1.45; }
+    .setup-ctrl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    @media (min-width: 760px) {
+      .setup-layout {
+        grid-template-columns: auto 250px; grid-template-rows: auto 1fr; column-gap: 24px;
+        grid-template-areas: "board side" "board go";
+        --cell: clamp(30px, min(calc((min(100vw, 1240px) - 340px) / 10), calc((100vh - 190px) / 10)), 60px);
+      }
+      .tray { flex-direction: column; flex-wrap: nowrap; }
+      /* Room to show the selected ship turned, without the list jumping around. */
+      .tray-sil { width: calc(var(--u) * 5); justify-content: center; }
+      .tray-txt small { display: block; }
+      .ship-opt.vert .tray-sil .h { display: none; }
+      .ship-opt.vert .tray-sil .v { display: block; }
+    }
 
     /* ── Modal ── */
     .modal-bd {
@@ -249,8 +323,10 @@ let opponentShots = [];
 let view          = 'loading';
 
 // Setup state
-let setupShips  = [];
-let horizontal  = true;
+let setupShips   = [];    // placed so far: { type, size, label, horizontal, positions }
+let selectedType = null;  // the ship the next board click places
+let horizontal   = true;  // orientation of the selected ship
+let hoverCell    = null;
 let revealOpp   = false;
 
 // Modal
@@ -363,16 +439,27 @@ function shipCells(row, col, size, horiz) {
 function inBounds(cells) {
   return cells.every(c => c.row >= 0 && c.row < GRID && c.col >= 0 && c.col < GRID);
 }
+// Ship rows from the DB carry positions as JSON text; ships still being placed
+// carry them as an array.
+function posOf(ship) {
+  return typeof ship.positions === 'string' ? JSON.parse(ship.positions) : ship.positions;
+}
 function overlaps(cells, ships) {
   const occ = new Set();
   for (const s of ships) {
-    for (const p of JSON.parse(s.positions)) occ.add(`${p.row},${p.col}`);
+    for (const p of posOf(s)) occ.add(`${p.row},${p.col}`);
   }
   return cells.some(c => occ.has(`${c.row},${c.col}`));
 }
 function validPlace(row, col, size, horiz, placed) {
   const cells = shipCells(row, col, size, horiz);
   return inBounds(cells) && !overlaps(cells, placed);
+}
+function firstUnplaced() {
+  return SHIPS.find(s => !setupShips.some(p => p.type === s.type))?.type ?? null;
+}
+function placedShipAt(row, col) {
+  return setupShips.find(s => s.positions.some(p => p.row === row && p.col === col)) ?? null;
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
@@ -561,9 +648,11 @@ async function fireAt(gameId, row, col) {
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 async function openGame(gameId) {
-  revealOpp  = false;
-  setupShips = [];
-  horizontal = true;
+  revealOpp    = false;
+  setupShips   = [];
+  selectedType = SHIPS[0].type;
+  horizontal   = true;
+  hoverCell    = null;
   await loadGameDetail(gameId);
   view = 'game';
   render();
@@ -699,16 +788,84 @@ window.submitChallenge = async function() {
   pendingOpponentId = null;
 };
 
+// ── Ship art ──────────────────────────────────────────────────────────────────
+// Top-down silhouettes, drawn bow-right in a (size × 100) by 100 box so one
+// drawing serves both orientations: vertical is the same art turned 90°.
+function shipArt(type, L) {
+  const hull   = d => `<path class="sh-hull" d="${d}"/>`;
+  const turret = (x, dir) =>
+    `<line class="sh-gun" x1="${x}" y1="50" x2="${x + dir * 34}" y2="50"/><circle class="sh-det" cx="${x}" cy="50" r="13"/>`;
+  const pointed = `M14,18 L${L-62},18 Q${L-20},25 ${L-5},50 Q${L-20},75 ${L-62},82 L14,82 Q5,82 5,72 L5,28 Q5,18 14,18 Z`;
+  switch (type) {
+    case 'carrier':
+      return hull(`M12,16 L${L-48},16 L${L-8},32 L${L-8},68 L${L-48},84 L12,84 Q5,84 5,76 L5,24 Q5,16 12,16 Z`)
+        + `<line class="sh-line" x1="26" y1="50" x2="${L-30}" y2="50" stroke-dasharray="22 14"/>`
+        + `<rect class="sh-dk" x="90" y="62" width="36" height="16" rx="2"/>`
+        + `<rect class="sh-dk" x="${L-170}" y="62" width="36" height="16" rx="2"/>`
+        + `<rect class="sh-det" x="${L/2 - 20}" y="21" width="76" height="17" rx="4"/>`;
+    case 'battleship':
+      return hull(pointed)
+        + `<rect class="sh-dk" x="${L/2 - 50}" y="34" width="84" height="32" rx="6"/>`
+        + `<circle class="sh-det" cx="${L/2 - 8}" cy="50" r="9"/>`
+        + turret(L - 175, 1) + turret(L - 118, 1) + turret(86, -1);
+    case 'cruiser':
+      return hull(pointed)
+        + `<rect class="sh-dk" x="${L/2 - 36}" y="35" width="66" height="30" rx="6"/>`
+        + `<circle class="sh-det" cx="${L/2 - 4}" cy="50" r="8"/>`
+        + turret(L - 96, 1) + turret(70, -1);
+    case 'submarine':
+      return `<rect class="sh-hull" x="${L/2 + 12}" y="20" width="14" height="60" rx="5"/>`
+        + `<path class="sh-hull" d="M8,34 L30,44 L30,56 L8,66 Z"/>`
+        + hull(`M36,30 L${L-70},30 Q${L-6},32 ${L-6},50 Q${L-6},68 ${L-70},70 L36,70 Q14,66 14,50 Q14,34 36,30 Z`)
+        + `<circle class="sh-dk" cx="80" cy="50" r="6"/><circle class="sh-dk" cx="${L-62}" cy="50" r="6"/>`
+        + `<rect class="sh-det" x="${L/2 - 12}" y="40" width="56" height="20" rx="10"/>`;
+    case 'destroyer':
+      return hull(pointed)
+        + `<rect class="sh-dk" x="56" y="36" width="42" height="28" rx="5"/>`
+        + turret(L - 76, 1);
+    default:
+      return hull(pointed);
+  }
+}
+
+function shipSvg(type, size, horiz) {
+  const L = size * 100;
+  const art = shipArt(type, L);
+  return horiz
+    ? `<svg viewBox="0 0 ${L} 100" aria-hidden="true">${art}</svg>`
+    : `<svg viewBox="0 0 100 ${L}" aria-hidden="true"><g transform="translate(100,0) rotate(90)">${art}</g></svg>`;
+}
+
+// One absolutely-positioned element spanning the ship's cells, sized off --cell.
+function shipEl(type, row, col, size, horiz, cls = '') {
+  const w = horiz ? size : 1, h = horiz ? 1 : size;
+  return `<div class="ship-el ${cls}" data-ship="${esc(type)}" style="left:calc(var(--cell)*${col});top:calc(var(--cell)*${row});width:calc(var(--cell)*${w});height:calc(var(--cell)*${h})">${shipSvg(type, size, horiz)}</div>`;
+}
+
+// A ship whose every cell has been struck is drawn as a wreck.
+function shipsLayer(ships, shots = [], cls = '') {
+  const struck = new Set(shots.filter(s => s.result !== 'miss').map(s => `${s.target_row},${s.target_col}`));
+  return ships.map(s => {
+    const pos = posOf(s);
+    if (!pos.length) return '';
+    const row = Math.min(...pos.map(p => p.row));
+    const col = Math.min(...pos.map(p => p.col));
+    const horiz = pos.every(p => p.row === row);
+    const sunk = pos.every(p => struck.has(`${p.row},${p.col}`));
+    return shipEl(s.ship_type ?? s.type, row, col, pos.length, horiz, `${cls}${sunk ? ' sunk' : ''}`);
+  }).join('');
+}
+
 // ── Grid rendering ────────────────────────────────────────────────────────────
 function buildGrid(ships, shots, revealed = []) {
   const g = Array.from({ length: GRID }, () =>
     Array.from({ length: GRID }, () => ({ ship: false, shot: null, rev: false }))
   );
   for (const s of ships) {
-    for (const p of JSON.parse(s.positions)) g[p.row][p.col].ship = true;
+    for (const p of posOf(s)) g[p.row][p.col].ship = true;
   }
   for (const s of revealed) {
-    for (const p of JSON.parse(s.positions)) g[p.row][p.col].rev = true;
+    for (const p of posOf(s)) g[p.row][p.col].rev = true;
   }
   for (const s of shots) {
     g[s.target_row][s.target_col].shot = s.result;
@@ -716,8 +873,12 @@ function buildGrid(ships, shots, revealed = []) {
   return g;
 }
 
-function renderGrid(cellGrid, { clickFn = null, showShips = false, showRev = false, testid = null } = {}) {
+function gridFrame(rows, layer, attrs = '') {
   const colRow = COLS.map(l => `<div class="gcl">${l}</div>`).join('');
+  return `<div class="grid-wrap"${attrs}><div class="grid-col-row">${colRow}</div>${rows.join('')}<div class="sea"></div><div class="ships-layer">${layer}</div></div>`;
+}
+
+function renderGrid(cellGrid, { clickFn = null, showShips = false, showRev = false, testid = null, layer = '' } = {}) {
   const rows = [];
   for (let r = 0; r < GRID; r++) {
     const cells = [];
@@ -737,41 +898,51 @@ function renderGrid(cellGrid, { clickFn = null, showShips = false, showRev = fal
     }
     rows.push(`<div class="grid-row"><div class="grl">${r+1}</div>${cells.join('')}</div>`);
   }
-  return `<div class="grid-wrap"${testid ? ` data-testid="${testid}"` : ''}><div class="grid-col-row">${colRow}</div>${rows.join('')}</div>`;
+  return gridFrame(rows, layer, testid ? ` data-testid="${testid}"` : '');
 }
 
 function renderSetupGrid() {
-  const placed = setupShips.map(s => ({ positions: JSON.stringify(s.positions) }));
-  const cellGrid = buildGrid(placed, []);
-  const colRow = COLS.map(l => `<div class="gcl">${l}</div>`).join('');
+  const cellGrid = buildGrid(setupShips, []);
   const rows = [];
   for (let r = 0; r < GRID; r++) {
     const cells = [];
     for (let c = 0; c < GRID; c++) {
-      const cell = cellGrid[r][c];
-      let cls = 'gc';
-      if (cell.ship) cls += ' ship';
-      else cls += ' shootable'; // hover-targetable
-      cells.push(`<div class="${cls}" data-r="${r}" data-c="${c}" onclick="onPlace(${r},${c})" onmouseover="onHover(${r},${c})" onmouseout="onHoverOut()"></div>`);
+      // A placed ship's cells pick it back up; open water takes the selected ship.
+      const cls = cellGrid[r][c].ship ? 'gc ship placed' : 'gc shootable';
+      cells.push(`<div class="${cls}" data-r="${r}" data-c="${c}" onclick="onPlace(${r},${c})" onmouseover="onHover(${r},${c})"></div>`);
     }
     rows.push(`<div class="grid-row"><div class="grl">${r+1}</div>${cells.join('')}</div>`);
   }
-  return `<div class="grid-wrap" id="setup-grid"><div class="grid-col-row">${colRow}</div>${rows.join('')}</div>`;
+  return gridFrame(rows, shipsLayer(setupShips), ' id="setup-grid" onmouseleave="onHoverOut()" oncontextmenu="return onRotateMenu()"');
 }
 
-// Apply hover highlight directly to DOM (avoids full re-render on every mouseover)
+function clearHover() {
+  const grid = document.getElementById('setup-grid');
+  if (!grid) return;
+  grid.querySelectorAll('.pok,.pbad').forEach(el => el.classList.remove('pok','pbad'));
+  grid.querySelectorAll('.ghost').forEach(el => el.remove());
+  grid.querySelectorAll('.lift').forEach(el => el.classList.remove('lift'));
+}
+
+// Apply hover preview directly to DOM (avoids full re-render on every mouseover)
 function applyHover(row, col) {
-  document.querySelectorAll('.gc.pok,.gc.pbad').forEach(el => el.classList.remove('pok','pbad'));
-  const remaining = SHIPS.filter(s => !setupShips.some(p => p.type === s.type));
-  const ship = remaining[0];
+  clearHover();
+  const grid = document.getElementById('setup-grid');
+  if (!grid) return;
+  const under = placedShipAt(row, col);
+  if (under) {
+    grid.querySelector(`.ship-el[data-ship="${under.type}"]`)?.classList.add('lift');
+    return;
+  }
+  const ship = SHIPS.find(s => s.type === selectedType);
   if (!ship) return;
-  const placed = setupShips.map(s => ({ positions: JSON.stringify(s.positions) }));
   const cells = shipCells(row, col, ship.size, horizontal);
-  const ok = inBounds(cells) && !overlaps(cells, placed);
+  const ok = inBounds(cells) && !overlaps(cells, setupShips);
   cells.forEach(({ row:r, col:c }) => {
-    const el = document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
-    if (el) el.classList.add(ok ? 'pok' : 'pbad');
+    grid.querySelector(`[data-r="${r}"][data-c="${c}"]`)?.classList.add(ok ? 'pok' : 'pbad');
   });
+  grid.querySelector('.ships-layer')
+    ?.insertAdjacentHTML('beforeend', shipEl(ship.type, row, col, ship.size, horizontal, `ghost ${ok ? 'ok' : 'bad'}`));
 }
 
 // ── Views ─────────────────────────────────────────────────────────────────────
@@ -808,7 +979,7 @@ function renderHome() {
 
   const s = (label, list) => list.length ? `<div class="sec">${label} (${list.length})</div>${list.map(card).join('')}` : '';
 
-  document.getElementById('app').innerHTML = `
+  document.getElementById('app').innerHTML = `<div class="narrow">
     <div class="hdr">
       <div><h1>${glyph('anchor')} Sea Battle</h1><div class="sub">Async naval strategy for the family</div></div>
       <button class="btn btn-primary" onclick="openNewGame()">+ New Game</button>
@@ -816,42 +987,59 @@ function renderHome() {
     ${s('Your Turn', myTurn)}
     ${s('Waiting', waiting)}
     ${s('Completed', done.slice(0,10))}
-    ${!games.length ? `<div class="empty"><div class="icon">${chickadee('nest', { size: 72 })}</div><p>No games yet.</p><p style="margin-top:6px">Challenge a family member to start!</p></div>` : ''}`;
+    ${!games.length ? `<div class="empty"><div class="icon">${chickadee('nest', { size: 72 })}</div><p>No games yet.</p><p style="margin-top:6px">Challenge a family member to start!</p></div>` : ''}
+  </div>`;
 }
 
 function renderSetup() {
   const g = currentGame;
   const oppName = g.challenger_id === me?.id ? g.opponent_name : g.challenger_name;
-  const remaining = SHIPS.filter(s => !setupShips.some(p => p.type === s.type));
-  const palette = SHIPS.map(s => {
+  const selected = SHIPS.find(s => s.type === selectedType) ?? null;
+  const tray = SHIPS.map(s => {
     const done = setupShips.some(p => p.type === s.type);
-    const next = !done && s.type === remaining[0]?.type;
-    const blocks = Array.from({ length:s.size }, () => `<div class="sblock"></div>`).join('');
-    return `<div class="ship-opt ${done?'done':''} ${next?'next':''}">
-      <div class="sblocks">${blocks}</div>
-      <span>${esc(s.label)}</span>
+    const sel  = !done && s.type === selectedType;
+    const note = done ? 'Placed — click to pick up'
+               : sel  ? `${horizontal ? '↔ Horizontal' : '↕ Vertical'} — click to rotate`
+               :        `${s.size} cells`;
+    return `<button type="button" class="ship-opt ${done?'done':''} ${sel?'sel':''} ${sel && !horizontal ? 'vert' : ''}"
+        data-testid="tray-ship" data-ship="${s.type}" aria-pressed="${sel}" onclick="selectShip('${s.type}')">
+      <span class="tray-sil" style="--n:${s.size}">
+        <span class="h">${shipSvg(s.type, s.size, true)}</span>
+        ${sel ? `<span class="v">${shipSvg(s.type, s.size, false)}</span>` : ''}
+      </span>
+      <span class="tray-txt"><b>${esc(s.label)}</b><small>${note}</small></span>
       ${done ? `<span style="color:#22c55e">${glyph('tick')}</span>` : ''}
-    </div>`;
+    </button>`;
   }).join('');
-  const allPlaced = !remaining.length;
+  const allPlaced = setupShips.length === SHIPS.length;
+  const hint = selected
+    ? `Placing <b>${esc(selected.label)}</b> (${selected.size} cells, ${horizontal ? 'horizontal' : 'vertical'}). Click the board to place it. To rotate, click it again in the list, press R, or right-click the board.`
+    : 'All ships placed. Click any ship to pick it up and move it.';
 
-  document.getElementById('app').innerHTML = `
+  document.getElementById('app').innerHTML = `<div class="stage">
     <button class="back" onclick="goHome()">‹ All Games</button>
     <div class="hdr" style="margin-bottom:10px">
       <div><h1>${glyph('anchor')} Place Your Fleet</h1><div class="sub">vs. ${esc(oppName)}</div></div>
     </div>
-    <div class="setup-ctrl">
-      <button class="btn btn-secondary btn-sm" onclick="toggleDir()">
-        ${horizontal ? '↔ Horizontal' : '↕ Vertical'}
-      </button>
-      ${setupShips.length ? `<button class="btn btn-secondary btn-sm" onclick="undoShip()">↩ Undo</button>` : ''}
+    <div class="setup-layout">
+      <div class="setup-side">
+        <div class="tray">${tray}</div>
+        <p class="setup-hint">${hint}</p>
+        <div class="setup-ctrl">
+          <button class="btn btn-secondary btn-sm" ${selected ? '' : 'disabled'} onclick="toggleDir()">↻ Rotate</button>
+          ${setupShips.length ? `<button class="btn btn-secondary btn-sm" onclick="clearShips()">Clear all</button>` : ''}
+        </div>
+      </div>
+      <div class="setup-board">${renderSetupGrid()}</div>
+      <div class="setup-go">
+        <button class="btn btn-primary" id="ready-btn" ${allPlaced?'':'disabled'} onclick="submitFleet()">
+          ${allPlaced ? `${glyph('flag', { accent: 'currentColor' })} Ready to Battle!` : `Place all ships (${setupShips.length}/${SHIPS.length})`}
+        </button>
+      </div>
     </div>
-    <div class="palette">${palette}</div>
-    ${remaining[0] ? `<p style="font-size:0.78rem;color:var(--muted);margin-bottom:8px">Placing: ${esc(remaining[0].label)} (${remaining[0].size} cells) — hover to preview, click to place</p>` : ''}
-    <div style="margin-bottom:14px">${renderSetupGrid()}</div>
-    <button class="btn btn-primary" id="ready-btn" ${allPlaced?'':'disabled'} onclick="submitFleet()">
-      ${allPlaced ? `${glyph('flag', { accent: 'currentColor' })} Ready to Battle!` : `Place all ships (${setupShips.length}/${SHIPS.length})`}
-    </button>`;
+  </div>`;
+  // The pointer has not moved, so restore the preview the re-render wiped.
+  if (hoverCell) applyHover(hoverCell.row, hoverCell.col);
 }
 
 function renderWaiting(oppName) {
@@ -872,7 +1060,7 @@ function renderActiveGame() {
   const oppName  = isChallenger ? g.opponent_name  : g.challenger_name;
   const isMyTurn = g.current_turn_id === me?.id;
 
-  const myGrid  = renderGrid(buildGrid(myShips, opponentShots), { showShips:true, testid:'my-grid' });
+  const myGrid  = renderGrid(buildGrid(myShips, opponentShots), { showShips:true, testid:'my-grid', layer: shipsLayer(myShips, opponentShots) });
   const oppGrid = renderGrid(buildGrid([], myShots), {
     showShips:false,
     clickFn: isMyTurn ? 'onFire' : null,
@@ -891,7 +1079,7 @@ function renderActiveGame() {
     lastHtml = `<div class="shot-result ${last.result}">${icons[last.result]} ${labels[last.result]} — ${COLS[last.target_col]}${last.target_row+1}</div>`;
   }
 
-  document.getElementById('app').innerHTML = `
+  document.getElementById('app').innerHTML = `<div class="stage">
     <button class="back" onclick="goHome()">‹ All Games</button>
     <div class="status-bar">
       <span style="font-weight:600">vs. ${esc(oppName)}</span>
@@ -911,7 +1099,8 @@ function renderActiveGame() {
     </div>
     <div style="margin-top:16px;text-align:center">
       <button class="btn btn-secondary btn-sm" onclick="resign('${esc(g.id)}')">${glyph('flag')} ${opponentOnRoster(g) ? 'Resign' : 'End game'}</button>
-    </div>`;
+    </div>
+  </div>`;
 }
 
 function renderComplete() {
@@ -930,10 +1119,13 @@ function renderComplete() {
                   : iWon         ? `You sank ${esc(oppName)}'s entire fleet!`
                   :                `${esc(g.winner_name)} sank your last ship.`;
 
-  const myGrid  = renderGrid(buildGrid(myShips, opponentShots), { showShips:true, testid:'my-grid' });
-  const oppGrid = renderGrid(buildGrid([], myShots, revealOpp ? opponentShips : []), { showShips:false, showRev:revealOpp, testid:'enemy-grid' });
+  const myGrid  = renderGrid(buildGrid(myShips, opponentShots), { showShips:true, testid:'my-grid', layer: shipsLayer(myShips, opponentShots) });
+  const oppGrid = renderGrid(buildGrid([], myShots, revealOpp ? opponentShips : []), {
+    showShips:false, showRev:revealOpp, testid:'enemy-grid',
+    layer: revealOpp ? shipsLayer(opponentShips, myShots, 'reveal') : '',
+  });
 
-  document.getElementById('app').innerHTML = `
+  document.getElementById('app').innerHTML = `<div class="stage">
     <button class="back" onclick="goHome()">‹ All Games</button>
     <div class="banner ${!abandoned && iWon && !iResigned ? 'win' : 'lose'}">
       <h2>${abandoned ? `${glyph('flag')} Game Ended` : iWon && !iResigned ? `${glyph('trophy')} Victory!` : iResigned ? `${glyph('flag')} Resigned` : `${glyph('anchor')} Defeated`}</h2>
@@ -954,7 +1146,8 @@ function renderComplete() {
     </div>
     <div style="margin-top:20px;text-align:center">
       <button class="btn btn-primary" onclick="openNewGame()">+ New Game</button>
-    </div>`;
+    </div>
+  </div>`;
 }
 
 function render() {
@@ -991,22 +1184,49 @@ window.onFire = async function(row, col) {
   await fireAt(currentGame.id, row, col);
 };
 
-window.onPlace = function(row, col) {
-  const remaining = SHIPS.filter(s => !setupShips.some(p => p.type === s.type));
-  const ship = remaining[0];
+// Lifting a placed ship selects it, in the orientation it was lying in.
+function pickUp(type) {
+  const ship = setupShips.find(p => p.type === type);
   if (!ship) return;
-  const placed = setupShips.map(s => ({ positions: JSON.stringify(s.positions) }));
-  if (!validPlace(row, col, ship.size, horizontal, placed)) return;
+  setupShips   = setupShips.filter(p => p.type !== type);
+  selectedType = type;
+  horizontal   = ship.horizontal;
+}
+
+window.onPlace = function(row, col) {
+  const under = placedShipAt(row, col);
+  if (under) { pickUp(under.type); renderSetup(); return; }
+  const ship = SHIPS.find(s => s.type === selectedType);
+  if (!ship) return;
+  if (!validPlace(row, col, ship.size, horizontal, setupShips)) return;
   const positions = shipCells(row, col, ship.size, horizontal);
-  setupShips = [...setupShips, { ...ship, positions }];
+  setupShips   = [...setupShips, { ...ship, horizontal, positions }];
+  selectedType = firstUnplaced();
+  hoverCell    = null;
   renderSetup();
 };
 
-window.onHover    = function(row, col) { applyHover(row, col); };
-window.onHoverOut = function()          { document.querySelectorAll('.gc.pok,.gc.pbad').forEach(el=>el.classList.remove('pok','pbad')); };
+// Tray click: pick up a placed ship, rotate the selected one, or select another.
+window.selectShip = function(type) {
+  if (setupShips.some(p => p.type === type)) pickUp(type);
+  else if (selectedType === type) horizontal = !horizontal;
+  else selectedType = type;
+  renderSetup();
+};
 
-window.toggleDir = function() { horizontal = !horizontal; renderSetup(); };
-window.undoShip  = function() { setupShips = setupShips.slice(0,-1); renderSetup(); };
+window.onHover    = function(row, col) { hoverCell = { row, col }; applyHover(row, col); };
+window.onHoverOut = function()          { hoverCell = null; clearHover(); };
+
+window.toggleDir  = function() { if (!selectedType) return; horizontal = !horizontal; renderSetup(); };
+window.clearShips = function() { setupShips = []; selectedType = firstUnplaced(); renderSetup(); };
+window.onRotateMenu = function() { window.toggleDir(); return false; };
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'r' && e.key !== 'R') return;
+  if (e.metaKey || e.ctrlKey || e.altKey || modalEl) return;
+  if (!document.getElementById('setup-grid')) return;
+  window.toggleDir();
+});
 
 window.submitFleet = async function() {
   if (!currentGame || setupShips.length !== SHIPS.length) return;
