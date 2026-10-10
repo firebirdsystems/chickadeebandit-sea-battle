@@ -1,0 +1,2320 @@
+{
+ "seed": [
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-0.05 days','+0 minutes'))",
+   "params": [
+    "perf-game-01",
+    "{{me}}",
+    "Sam",
+    "{{partner}}",
+    "Jordan",
+    "challenger_turn",
+    "{{me}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-c1",
+    "perf-game-01",
+    "{{me}}",
+    "carrier",
+    5,
+    "[{\"row\":1,\"col\":9},{\"row\":2,\"col\":9},{\"row\":3,\"col\":9},{\"row\":4,\"col\":9},{\"row\":5,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-c2",
+    "perf-game-01",
+    "{{me}}",
+    "battleship",
+    4,
+    "[{\"row\":5,\"col\":0},{\"row\":6,\"col\":0},{\"row\":7,\"col\":0},{\"row\":8,\"col\":0}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-c3",
+    "perf-game-01",
+    "{{me}}",
+    "cruiser",
+    3,
+    "[{\"row\":0,\"col\":2},{\"row\":0,\"col\":3},{\"row\":0,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-c4",
+    "perf-game-01",
+    "{{me}}",
+    "submarine",
+    3,
+    "[{\"row\":8,\"col\":4},{\"row\":8,\"col\":5},{\"row\":8,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-c5",
+    "perf-game-01",
+    "{{me}}",
+    "destroyer",
+    2,
+    "[{\"row\":3,\"col\":5},{\"row\":3,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-o1",
+    "perf-game-01",
+    "{{partner}}",
+    "carrier",
+    5,
+    "[{\"row\":9,\"col\":0},{\"row\":9,\"col\":1},{\"row\":9,\"col\":2},{\"row\":9,\"col\":3},{\"row\":9,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-o2",
+    "perf-game-01",
+    "{{partner}}",
+    "battleship",
+    4,
+    "[{\"row\":0,\"col\":6},{\"row\":0,\"col\":7},{\"row\":0,\"col\":8},{\"row\":0,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-o3",
+    "perf-game-01",
+    "{{partner}}",
+    "cruiser",
+    3,
+    "[{\"row\":2,\"col\":1},{\"row\":3,\"col\":1},{\"row\":4,\"col\":1}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-o4",
+    "perf-game-01",
+    "{{partner}}",
+    "submarine",
+    3,
+    "[{\"row\":5,\"col\":4},{\"row\":6,\"col\":4},{\"row\":7,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-01-ship-o5",
+    "perf-game-01",
+    "{{partner}}",
+    "destroyer",
+    2,
+    "[{\"row\":6,\"col\":8},{\"row\":7,\"col\":8}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+186 minutes'))",
+   "params": [
+    "perf-game-01-shot-c01",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    2,
+    5,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+362 minutes'))",
+   "params": [
+    "perf-game-01-shot-o01",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    8,
+    7,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+539 minutes'))",
+   "params": [
+    "perf-game-01-shot-c02",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    6,
+    5,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+715 minutes'))",
+   "params": [
+    "perf-game-01-shot-o02",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    1,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+891 minutes'))",
+   "params": [
+    "perf-game-01-shot-c03",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    9,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+1067 minutes'))",
+   "params": [
+    "perf-game-01-shot-o03",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    1,
+    6,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+1243 minutes'))",
+   "params": [
+    "perf-game-01-shot-c04",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    2,
+    1,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+1419 minutes'))",
+   "params": [
+    "perf-game-01-shot-o04",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    2,
+    7,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+1596 minutes'))",
+   "params": [
+    "perf-game-01-shot-c05",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    0,
+    3,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+1772 minutes'))",
+   "params": [
+    "perf-game-01-shot-o05",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    8,
+    5,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+1948 minutes'))",
+   "params": [
+    "perf-game-01-shot-c06",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    9,
+    1,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+2124 minutes'))",
+   "params": [
+    "perf-game-01-shot-o06",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    2,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+2300 minutes'))",
+   "params": [
+    "perf-game-01-shot-c07",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    9,
+    8,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+2476 minutes'))",
+   "params": [
+    "perf-game-01-shot-o07",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    5,
+    4,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+2653 minutes'))",
+   "params": [
+    "perf-game-01-shot-c08",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    0,
+    6,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+2829 minutes'))",
+   "params": [
+    "perf-game-01-shot-o08",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    3,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+3005 minutes'))",
+   "params": [
+    "perf-game-01-shot-c09",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    2,
+    8,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+3181 minutes'))",
+   "params": [
+    "perf-game-01-shot-o09",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    6,
+    3,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+3357 minutes'))",
+   "params": [
+    "perf-game-01-shot-c10",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    9,
+    2,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+3533 minutes'))",
+   "params": [
+    "perf-game-01-shot-o10",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    5,
+    3,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+3710 minutes'))",
+   "params": [
+    "perf-game-01-shot-c11",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    1,
+    0,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+3886 minutes'))",
+   "params": [
+    "perf-game-01-shot-o11",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    2,
+    0,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+4062 minutes'))",
+   "params": [
+    "perf-game-01-shot-c12",
+    "perf-game-01",
+    "{{me}}",
+    "{{partner}}",
+    7,
+    8,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','+4238 minutes'))",
+   "params": [
+    "perf-game-01-shot-o12",
+    "perf-game-01",
+    "{{partner}}",
+    "{{me}}",
+    4,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-0.3 days','+0 minutes'))",
+   "params": [
+    "perf-game-02",
+    "{{child}}",
+    "Mia",
+    "{{me}}",
+    "Sam",
+    "opponent_turn",
+    "{{me}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-c1",
+    "perf-game-02",
+    "{{child}}",
+    "carrier",
+    5,
+    "[{\"row\":9,\"col\":0},{\"row\":9,\"col\":1},{\"row\":9,\"col\":2},{\"row\":9,\"col\":3},{\"row\":9,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-c2",
+    "perf-game-02",
+    "{{child}}",
+    "battleship",
+    4,
+    "[{\"row\":0,\"col\":6},{\"row\":0,\"col\":7},{\"row\":0,\"col\":8},{\"row\":0,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-c3",
+    "perf-game-02",
+    "{{child}}",
+    "cruiser",
+    3,
+    "[{\"row\":2,\"col\":1},{\"row\":3,\"col\":1},{\"row\":4,\"col\":1}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-c4",
+    "perf-game-02",
+    "{{child}}",
+    "submarine",
+    3,
+    "[{\"row\":5,\"col\":4},{\"row\":6,\"col\":4},{\"row\":7,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-c5",
+    "perf-game-02",
+    "{{child}}",
+    "destroyer",
+    2,
+    "[{\"row\":6,\"col\":8},{\"row\":7,\"col\":8}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-o1",
+    "perf-game-02",
+    "{{me}}",
+    "carrier",
+    5,
+    "[{\"row\":3,\"col\":2},{\"row\":3,\"col\":3},{\"row\":3,\"col\":4},{\"row\":3,\"col\":5},{\"row\":3,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-o2",
+    "perf-game-02",
+    "{{me}}",
+    "battleship",
+    4,
+    "[{\"row\":6,\"col\":6},{\"row\":6,\"col\":7},{\"row\":6,\"col\":8},{\"row\":6,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-o3",
+    "perf-game-02",
+    "{{me}}",
+    "cruiser",
+    3,
+    "[{\"row\":0,\"col\":9},{\"row\":1,\"col\":9},{\"row\":2,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-o4",
+    "perf-game-02",
+    "{{me}}",
+    "submarine",
+    3,
+    "[{\"row\":8,\"col\":0},{\"row\":8,\"col\":1},{\"row\":8,\"col\":2}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-02-ship-o5",
+    "perf-game-02",
+    "{{me}}",
+    "destroyer",
+    2,
+    "[{\"row\":1,\"col\":4},{\"row\":2,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+365 minutes'))",
+   "params": [
+    "perf-game-02-shot-c01",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    0,
+    7,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+720 minutes'))",
+   "params": [
+    "perf-game-02-shot-o01",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    9,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+1075 minutes'))",
+   "params": [
+    "perf-game-02-shot-c02",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    3,
+    2,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+1431 minutes'))",
+   "params": [
+    "perf-game-02-shot-o02",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    2,
+    5,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+1786 minutes'))",
+   "params": [
+    "perf-game-02-shot-c03",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    3,
+    3,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+2141 minutes'))",
+   "params": [
+    "perf-game-02-shot-o03",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    9,
+    1,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+2496 minutes'))",
+   "params": [
+    "perf-game-02-shot-c04",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    6,
+    6,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+2851 minutes'))",
+   "params": [
+    "perf-game-02-shot-o04",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    6,
+    4,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+3206 minutes'))",
+   "params": [
+    "perf-game-02-shot-c05",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    2,
+    4,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+3562 minutes'))",
+   "params": [
+    "perf-game-02-shot-o05",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    9,
+    2,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+3917 minutes'))",
+   "params": [
+    "perf-game-02-shot-c06",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    3,
+    4,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+4272 minutes'))",
+   "params": [
+    "perf-game-02-shot-o06",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    2,
+    2,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+4627 minutes'))",
+   "params": [
+    "perf-game-02-shot-c07",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    3,
+    5,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+4982 minutes'))",
+   "params": [
+    "perf-game-02-shot-o07",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    7,
+    3,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+5337 minutes'))",
+   "params": [
+    "perf-game-02-shot-c08",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    0,
+    2,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+5693 minutes'))",
+   "params": [
+    "perf-game-02-shot-o08",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    9,
+    3,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+6048 minutes'))",
+   "params": [
+    "perf-game-02-shot-c09",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    7,
+    4,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+6403 minutes'))",
+   "params": [
+    "perf-game-02-shot-o09",
+    "perf-game-02",
+    "{{me}}",
+    "{{child}}",
+    1,
+    9,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','+6758 minutes'))",
+   "params": [
+    "perf-game-02-shot-c10",
+    "perf-game-02",
+    "{{child}}",
+    "{{me}}",
+    5,
+    2,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-0.5 days','+0 minutes'))",
+   "params": [
+    "perf-game-03",
+    "{{me}}",
+    "Sam",
+    "{{child2}}",
+    "Leo",
+    "opponent_turn",
+    "{{child2}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-c1",
+    "perf-game-03",
+    "{{me}}",
+    "carrier",
+    5,
+    "[{\"row\":3,\"col\":2},{\"row\":3,\"col\":3},{\"row\":3,\"col\":4},{\"row\":3,\"col\":5},{\"row\":3,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-c2",
+    "perf-game-03",
+    "{{me}}",
+    "battleship",
+    4,
+    "[{\"row\":6,\"col\":6},{\"row\":6,\"col\":7},{\"row\":6,\"col\":8},{\"row\":6,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-c3",
+    "perf-game-03",
+    "{{me}}",
+    "cruiser",
+    3,
+    "[{\"row\":0,\"col\":9},{\"row\":1,\"col\":9},{\"row\":2,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-c4",
+    "perf-game-03",
+    "{{me}}",
+    "submarine",
+    3,
+    "[{\"row\":8,\"col\":0},{\"row\":8,\"col\":1},{\"row\":8,\"col\":2}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-c5",
+    "perf-game-03",
+    "{{me}}",
+    "destroyer",
+    2,
+    "[{\"row\":1,\"col\":4},{\"row\":2,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-o1",
+    "perf-game-03",
+    "{{child2}}",
+    "carrier",
+    5,
+    "[{\"row\":0,\"col\":0},{\"row\":0,\"col\":1},{\"row\":0,\"col\":2},{\"row\":0,\"col\":3},{\"row\":0,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-o2",
+    "perf-game-03",
+    "{{child2}}",
+    "battleship",
+    4,
+    "[{\"row\":2,\"col\":3},{\"row\":2,\"col\":4},{\"row\":2,\"col\":5},{\"row\":2,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-o3",
+    "perf-game-03",
+    "{{child2}}",
+    "cruiser",
+    3,
+    "[{\"row\":4,\"col\":7},{\"row\":5,\"col\":7},{\"row\":6,\"col\":7}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-o4",
+    "perf-game-03",
+    "{{child2}}",
+    "submarine",
+    3,
+    "[{\"row\":7,\"col\":1},{\"row\":7,\"col\":2},{\"row\":7,\"col\":3}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-03-ship-o5",
+    "perf-game-03",
+    "{{child2}}",
+    "destroyer",
+    2,
+    "[{\"row\":9,\"col\":8},{\"row\":9,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+153 minutes'))",
+   "params": [
+    "perf-game-03-shot-c01",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    0,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+295 minutes'))",
+   "params": [
+    "perf-game-03-shot-o01",
+    "perf-game-03",
+    "{{child2}}",
+    "{{me}}",
+    7,
+    8,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+438 minutes'))",
+   "params": [
+    "perf-game-03-shot-c02",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    5,
+    8,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+581 minutes'))",
+   "params": [
+    "perf-game-03-shot-o02",
+    "perf-game-03",
+    "{{child2}}",
+    "{{me}}",
+    1,
+    2,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+723 minutes'))",
+   "params": [
+    "perf-game-03-shot-c03",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    9,
+    2,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+866 minutes'))",
+   "params": [
+    "perf-game-03-shot-o03",
+    "perf-game-03",
+    "{{child2}}",
+    "{{me}}",
+    0,
+    1,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+1009 minutes'))",
+   "params": [
+    "perf-game-03-shot-c04",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    0,
+    1,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+1151 minutes'))",
+   "params": [
+    "perf-game-03-shot-o04",
+    "perf-game-03",
+    "{{child2}}",
+    "{{me}}",
+    8,
+    2,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+1294 minutes'))",
+   "params": [
+    "perf-game-03-shot-c05",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    3,
+    7,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+1437 minutes'))",
+   "params": [
+    "perf-game-03-shot-o05",
+    "perf-game-03",
+    "{{child2}}",
+    "{{me}}",
+    2,
+    1,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+1579 minutes'))",
+   "params": [
+    "perf-game-03-shot-c06",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    9,
+    7,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+1722 minutes'))",
+   "params": [
+    "perf-game-03-shot-o06",
+    "perf-game-03",
+    "{{child2}}",
+    "{{me}}",
+    6,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+1865 minutes'))",
+   "params": [
+    "perf-game-03-shot-c07",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    9,
+    3,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+2007 minutes'))",
+   "params": [
+    "perf-game-03-shot-o07",
+    "perf-game-03",
+    "{{child2}}",
+    "{{me}}",
+    2,
+    6,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-2 days','+2150 minutes'))",
+   "params": [
+    "perf-game-03-shot-c08",
+    "perf-game-03",
+    "{{me}}",
+    "{{child2}}",
+    8,
+    4,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-1 days','+0 minutes'))",
+   "params": [
+    "perf-game-04",
+    "{{adult2}}",
+    "Robin",
+    "{{me}}",
+    "Sam",
+    "challenger_turn",
+    "{{adult2}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-c1",
+    "perf-game-04",
+    "{{adult2}}",
+    "carrier",
+    5,
+    "[{\"row\":0,\"col\":0},{\"row\":0,\"col\":1},{\"row\":0,\"col\":2},{\"row\":0,\"col\":3},{\"row\":0,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-c2",
+    "perf-game-04",
+    "{{adult2}}",
+    "battleship",
+    4,
+    "[{\"row\":2,\"col\":3},{\"row\":2,\"col\":4},{\"row\":2,\"col\":5},{\"row\":2,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-c3",
+    "perf-game-04",
+    "{{adult2}}",
+    "cruiser",
+    3,
+    "[{\"row\":4,\"col\":7},{\"row\":5,\"col\":7},{\"row\":6,\"col\":7}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-c4",
+    "perf-game-04",
+    "{{adult2}}",
+    "submarine",
+    3,
+    "[{\"row\":7,\"col\":1},{\"row\":7,\"col\":2},{\"row\":7,\"col\":3}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-c5",
+    "perf-game-04",
+    "{{adult2}}",
+    "destroyer",
+    2,
+    "[{\"row\":9,\"col\":8},{\"row\":9,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-o1",
+    "perf-game-04",
+    "{{me}}",
+    "carrier",
+    5,
+    "[{\"row\":1,\"col\":9},{\"row\":2,\"col\":9},{\"row\":3,\"col\":9},{\"row\":4,\"col\":9},{\"row\":5,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-o2",
+    "perf-game-04",
+    "{{me}}",
+    "battleship",
+    4,
+    "[{\"row\":5,\"col\":0},{\"row\":6,\"col\":0},{\"row\":7,\"col\":0},{\"row\":8,\"col\":0}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-o3",
+    "perf-game-04",
+    "{{me}}",
+    "cruiser",
+    3,
+    "[{\"row\":0,\"col\":2},{\"row\":0,\"col\":3},{\"row\":0,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-o4",
+    "perf-game-04",
+    "{{me}}",
+    "submarine",
+    3,
+    "[{\"row\":8,\"col\":4},{\"row\":8,\"col\":5},{\"row\":8,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-04-ship-o5",
+    "perf-game-04",
+    "{{me}}",
+    "destroyer",
+    2,
+    "[{\"row\":3,\"col\":5},{\"row\":3,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+728 minutes'))",
+   "params": [
+    "perf-game-04-shot-c01",
+    "perf-game-04",
+    "{{adult2}}",
+    "{{me}}",
+    1,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+1446 minutes'))",
+   "params": [
+    "perf-game-04-shot-o01",
+    "perf-game-04",
+    "{{me}}",
+    "{{adult2}}",
+    9,
+    0,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+2164 minutes'))",
+   "params": [
+    "perf-game-04-shot-c02",
+    "perf-game-04",
+    "{{adult2}}",
+    "{{me}}",
+    3,
+    3,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+2882 minutes'))",
+   "params": [
+    "perf-game-04-shot-o02",
+    "perf-game-04",
+    "{{me}}",
+    "{{adult2}}",
+    6,
+    1,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+3600 minutes'))",
+   "params": [
+    "perf-game-04-shot-c03",
+    "perf-game-04",
+    "{{adult2}}",
+    "{{me}}",
+    1,
+    8,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+4318 minutes'))",
+   "params": [
+    "perf-game-04-shot-o03",
+    "perf-game-04",
+    "{{me}}",
+    "{{adult2}}",
+    7,
+    5,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+5036 minutes'))",
+   "params": [
+    "perf-game-04-shot-c04",
+    "perf-game-04",
+    "{{adult2}}",
+    "{{me}}",
+    2,
+    6,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+5754 minutes'))",
+   "params": [
+    "perf-game-04-shot-o04",
+    "perf-game-04",
+    "{{me}}",
+    "{{adult2}}",
+    0,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+6472 minutes'))",
+   "params": [
+    "perf-game-04-shot-c05",
+    "perf-game-04",
+    "{{adult2}}",
+    "{{me}}",
+    5,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','+7190 minutes'))",
+   "params": [
+    "perf-game-04-shot-o05",
+    "perf-game-04",
+    "{{me}}",
+    "{{adult2}}",
+    4,
+    4,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-0.4 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-0.35 days','+0 minutes'))",
+   "params": [
+    "perf-game-05",
+    "{{me}}",
+    "Sam",
+    "{{child}}",
+    "Mia",
+    "pending_opponent",
+    "{{child}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-05-ship-c1",
+    "perf-game-05",
+    "{{me}}",
+    "carrier",
+    5,
+    "[{\"row\":1,\"col\":9},{\"row\":2,\"col\":9},{\"row\":3,\"col\":9},{\"row\":4,\"col\":9},{\"row\":5,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-05-ship-c2",
+    "perf-game-05",
+    "{{me}}",
+    "battleship",
+    4,
+    "[{\"row\":5,\"col\":0},{\"row\":6,\"col\":0},{\"row\":7,\"col\":0},{\"row\":8,\"col\":0}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-05-ship-c3",
+    "perf-game-05",
+    "{{me}}",
+    "cruiser",
+    3,
+    "[{\"row\":0,\"col\":2},{\"row\":0,\"col\":3},{\"row\":0,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-05-ship-c4",
+    "perf-game-05",
+    "{{me}}",
+    "submarine",
+    3,
+    "[{\"row\":8,\"col\":4},{\"row\":8,\"col\":5},{\"row\":8,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-05-ship-c5",
+    "perf-game-05",
+    "{{me}}",
+    "destroyer",
+    2,
+    "[{\"row\":3,\"col\":5},{\"row\":3,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-1.2 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-1.1 days','+0 minutes'))",
+   "params": [
+    "perf-game-06",
+    "{{partner}}",
+    "Jordan",
+    "{{me}}",
+    "Sam",
+    "pending_opponent",
+    "{{me}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-06-ship-c1",
+    "perf-game-06",
+    "{{partner}}",
+    "carrier",
+    5,
+    "[{\"row\":9,\"col\":0},{\"row\":9,\"col\":1},{\"row\":9,\"col\":2},{\"row\":9,\"col\":3},{\"row\":9,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-06-ship-c2",
+    "perf-game-06",
+    "{{partner}}",
+    "battleship",
+    4,
+    "[{\"row\":0,\"col\":6},{\"row\":0,\"col\":7},{\"row\":0,\"col\":8},{\"row\":0,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-06-ship-c3",
+    "perf-game-06",
+    "{{partner}}",
+    "cruiser",
+    3,
+    "[{\"row\":2,\"col\":1},{\"row\":3,\"col\":1},{\"row\":4,\"col\":1}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-06-ship-c4",
+    "perf-game-06",
+    "{{partner}}",
+    "submarine",
+    3,
+    "[{\"row\":5,\"col\":4},{\"row\":6,\"col\":4},{\"row\":7,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-06-ship-c5",
+    "perf-game-06",
+    "{{partner}}",
+    "destroyer",
+    2,
+    "[{\"row\":6,\"col\":8},{\"row\":7,\"col\":8}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-0.1 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-0.1 days','+0 minutes'))",
+   "params": [
+    "perf-game-07",
+    "{{me}}",
+    "Sam",
+    "{{adult2}}",
+    "Robin",
+    "pending_challenger",
+    "{{me}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-9 days','+0 minutes'))",
+   "params": [
+    "perf-game-08",
+    "{{me}}",
+    "Sam",
+    "{{partner}}",
+    "Jordan",
+    "complete",
+    "{{me}}",
+    "Sam"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-c1",
+    "perf-game-08",
+    "{{me}}",
+    "carrier",
+    5,
+    "[{\"row\":0,\"col\":0},{\"row\":0,\"col\":1},{\"row\":0,\"col\":2},{\"row\":0,\"col\":3},{\"row\":0,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-c2",
+    "perf-game-08",
+    "{{me}}",
+    "battleship",
+    4,
+    "[{\"row\":2,\"col\":3},{\"row\":2,\"col\":4},{\"row\":2,\"col\":5},{\"row\":2,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-c3",
+    "perf-game-08",
+    "{{me}}",
+    "cruiser",
+    3,
+    "[{\"row\":4,\"col\":7},{\"row\":5,\"col\":7},{\"row\":6,\"col\":7}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-c4",
+    "perf-game-08",
+    "{{me}}",
+    "submarine",
+    3,
+    "[{\"row\":7,\"col\":1},{\"row\":7,\"col\":2},{\"row\":7,\"col\":3}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-c5",
+    "perf-game-08",
+    "{{me}}",
+    "destroyer",
+    2,
+    "[{\"row\":9,\"col\":8},{\"row\":9,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-o1",
+    "perf-game-08",
+    "{{partner}}",
+    "carrier",
+    5,
+    "[{\"row\":1,\"col\":9},{\"row\":2,\"col\":9},{\"row\":3,\"col\":9},{\"row\":4,\"col\":9},{\"row\":5,\"col\":9}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-o2",
+    "perf-game-08",
+    "{{partner}}",
+    "battleship",
+    4,
+    "[{\"row\":5,\"col\":0},{\"row\":6,\"col\":0},{\"row\":7,\"col\":0},{\"row\":8,\"col\":0}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-o3",
+    "perf-game-08",
+    "{{partner}}",
+    "cruiser",
+    3,
+    "[{\"row\":0,\"col\":2},{\"row\":0,\"col\":3},{\"row\":0,\"col\":4}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-o4",
+    "perf-game-08",
+    "{{partner}}",
+    "submarine",
+    3,
+    "[{\"row\":8,\"col\":4},{\"row\":8,\"col\":5},{\"row\":8,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__ships (id, game_id, owner_id, ship_type, ship_size, positions) VALUES (?, ?, ?, ?, ?, ?)",
+   "params": [
+    "perf-game-08-ship-o5",
+    "perf-game-08",
+    "{{partner}}",
+    "destroyer",
+    2,
+    "[{\"row\":3,\"col\":5},{\"row\":3,\"col\":6}]"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+110 minutes'))",
+   "params": [
+    "perf-game-08-shot-c01",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    1,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+210 minutes'))",
+   "params": [
+    "perf-game-08-shot-o01",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    0,
+    4,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+310 minutes'))",
+   "params": [
+    "perf-game-08-shot-c02",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    8,
+    7,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+410 minutes'))",
+   "params": [
+    "perf-game-08-shot-o02",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    4,
+    1,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+510 minutes'))",
+   "params": [
+    "perf-game-08-shot-c03",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    2,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+610 minutes'))",
+   "params": [
+    "perf-game-08-shot-o03",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    0,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+710 minutes'))",
+   "params": [
+    "perf-game-08-shot-c04",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    1,
+    8,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+810 minutes'))",
+   "params": [
+    "perf-game-08-shot-o04",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    0,
+    1,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+910 minutes'))",
+   "params": [
+    "perf-game-08-shot-c05",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    3,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1010 minutes'))",
+   "params": [
+    "perf-game-08-shot-o05",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    5,
+    3,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1110 minutes'))",
+   "params": [
+    "perf-game-08-shot-c06",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    3,
+    0,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1210 minutes'))",
+   "params": [
+    "perf-game-08-shot-o06",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    1,
+    8,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1310 minutes'))",
+   "params": [
+    "perf-game-08-shot-c07",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    4,
+    9,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1410 minutes'))",
+   "params": [
+    "perf-game-08-shot-o07",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    0,
+    2,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1510 minutes'))",
+   "params": [
+    "perf-game-08-shot-c08",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    2,
+    0,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1610 minutes'))",
+   "params": [
+    "perf-game-08-shot-o08",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    1,
+    2,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1710 minutes'))",
+   "params": [
+    "perf-game-08-shot-c09",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    5,
+    9,
+    "sunk",
+    "carrier"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1810 minutes'))",
+   "params": [
+    "perf-game-08-shot-o09",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    0,
+    3,
+    "sunk",
+    "carrier"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+1910 minutes'))",
+   "params": [
+    "perf-game-08-shot-c10",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    7,
+    7,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2010 minutes'))",
+   "params": [
+    "perf-game-08-shot-o10",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    4,
+    6,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2110 minutes'))",
+   "params": [
+    "perf-game-08-shot-c11",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    5,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2210 minutes'))",
+   "params": [
+    "perf-game-08-shot-o11",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    2,
+    3,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2310 minutes'))",
+   "params": [
+    "perf-game-08-shot-c12",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    6,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2410 minutes'))",
+   "params": [
+    "perf-game-08-shot-o12",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    2,
+    4,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2510 minutes'))",
+   "params": [
+    "perf-game-08-shot-c13",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    7,
+    0,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2610 minutes'))",
+   "params": [
+    "perf-game-08-shot-o13",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    2,
+    5,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2710 minutes'))",
+   "params": [
+    "perf-game-08-shot-c14",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    8,
+    0,
+    "sunk",
+    "battleship"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2810 minutes'))",
+   "params": [
+    "perf-game-08-shot-o14",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    0,
+    9,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+2910 minutes'))",
+   "params": [
+    "perf-game-08-shot-c15",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    0,
+    2,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3010 minutes'))",
+   "params": [
+    "perf-game-08-shot-o15",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    4,
+    5,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3110 minutes'))",
+   "params": [
+    "perf-game-08-shot-c16",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    0,
+    3,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3210 minutes'))",
+   "params": [
+    "perf-game-08-shot-o16",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    7,
+    5,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3310 minutes'))",
+   "params": [
+    "perf-game-08-shot-c17",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    0,
+    4,
+    "sunk",
+    "cruiser"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3410 minutes'))",
+   "params": [
+    "perf-game-08-shot-o17",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    2,
+    6,
+    "sunk",
+    "battleship"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3510 minutes'))",
+   "params": [
+    "perf-game-08-shot-c18",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    8,
+    4,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3610 minutes'))",
+   "params": [
+    "perf-game-08-shot-o18",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    4,
+    7,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3710 minutes'))",
+   "params": [
+    "perf-game-08-shot-c19",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    8,
+    5,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3810 minutes'))",
+   "params": [
+    "perf-game-08-shot-o19",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    7,
+    4,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+3910 minutes'))",
+   "params": [
+    "perf-game-08-shot-c20",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    8,
+    6,
+    "sunk",
+    "submarine"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+4010 minutes'))",
+   "params": [
+    "perf-game-08-shot-o20",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    5,
+    7,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+4110 minutes'))",
+   "params": [
+    "perf-game-08-shot-c21",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    3,
+    5,
+    "hit"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+4210 minutes'))",
+   "params": [
+    "perf-game-08-shot-o21",
+    "perf-game-08",
+    "{{partner}}",
+    "{{me}}",
+    7,
+    0,
+    "miss"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__shots (id, game_id, shooter_id, target_player_id, target_row, target_col, result, sunk_ship_type, shot_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-12 days','+4310 minutes'))",
+   "params": [
+    "perf-game-08-shot-c22",
+    "perf-game-08",
+    "{{me}}",
+    "{{partner}}",
+    3,
+    6,
+    "sunk",
+    "destroyer"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-20 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-16 days','+0 minutes'))",
+   "params": [
+    "perf-game-09",
+    "{{partner}}",
+    "Jordan",
+    "{{me}}",
+    "Sam",
+    "complete",
+    "{{partner}}",
+    "Jordan"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-24 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-22 days','+0 minutes'))",
+   "params": [
+    "perf-game-10",
+    "{{me}}",
+    "Sam",
+    "{{child}}",
+    "Mia",
+    "complete",
+    "{{me}}",
+    "Sam"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-30 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-27 days','+0 minutes'))",
+   "params": [
+    "perf-game-11",
+    "{{child2}}",
+    "Leo",
+    "{{me}}",
+    "Sam",
+    "complete",
+    "{{child2}}",
+    "Leo"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at, resigned_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-36 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-33 days','+0 minutes'), ?)",
+   "params": [
+    "perf-game-12",
+    "{{me}}",
+    "Sam",
+    "{{adult2}}",
+    "Robin",
+    "complete",
+    "{{adult2}}",
+    "Robin",
+    "{{me}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-41 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-39 days','+0 minutes'))",
+   "params": [
+    "perf-game-13",
+    "{{child}}",
+    "Mia",
+    "{{me}}",
+    "Sam",
+    "complete",
+    "{{me}}",
+    "Sam"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-47 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-44 days','+0 minutes'))",
+   "params": [
+    "perf-game-14",
+    "{{me}}",
+    "Sam",
+    "{{partner}}",
+    "Jordan",
+    "complete",
+    "{{partner}}",
+    "Jordan"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-55 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-51 days','+0 minutes'))",
+   "params": [
+    "perf-game-15",
+    "{{adult2}}",
+    "Robin",
+    "{{me}}",
+    "Sam",
+    "complete",
+    "{{me}}",
+    "Sam"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-62 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-60 days','+0 minutes'))",
+   "params": [
+    "perf-game-16",
+    "{{me}}",
+    "Sam",
+    "{{child2}}",
+    "Leo",
+    "complete",
+    "{{me}}",
+    "Sam"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at, resigned_by_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-70 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-66 days','+0 minutes'), ?)",
+   "params": [
+    "perf-game-17",
+    "{{partner}}",
+    "Jordan",
+    "{{me}}",
+    "Sam",
+    "complete",
+    "{{me}}",
+    "Sam",
+    "{{partner}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-78 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-75 days','+0 minutes'))",
+   "params": [
+    "perf-game-18",
+    "{{me}}",
+    "Sam",
+    "{{child}}",
+    "Mia",
+    "complete",
+    "{{child}}",
+    "Mia"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-85 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-83 days','+0 minutes'))",
+   "params": [
+    "perf-game-19",
+    "{{child2}}",
+    "Leo",
+    "{{me}}",
+    "Sam",
+    "complete",
+    "{{me}}",
+    "Sam"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-93 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-90 days','+0 minutes'))",
+   "params": [
+    "perf-game-20",
+    "{{me}}",
+    "Sam",
+    "{{partner}}",
+    "Jordan",
+    "complete",
+    "{{me}}",
+    "Sam"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-101 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-97 days','+0 minutes'))",
+   "params": [
+    "perf-game-21",
+    "{{adult2}}",
+    "Robin",
+    "{{me}}",
+    "Sam",
+    "complete",
+    "{{adult2}}",
+    "Robin"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-110 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-108 days','+0 minutes'))",
+   "params": [
+    "perf-game-22",
+    "{{me}}",
+    "Sam",
+    "{{child2}}",
+    "Leo",
+    "complete",
+    "{{child2}}",
+    "Leo"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, created_at, updated_at, abandoned_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-50 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-35 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-35 days','+0 minutes'))",
+   "params": [
+    "perf-game-23",
+    "{{me}}",
+    "Sam",
+    "{{adult2}}",
+    "Robin",
+    "complete"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, current_turn_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-4 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-1 days','+0 minutes'))",
+   "params": [
+    "perf-game-24",
+    "{{partner}}",
+    "Jordan",
+    "{{child}}",
+    "Mia",
+    "challenger_turn",
+    "{{partner}}"
+   ]
+  },
+  {
+   "sql": "INSERT INTO app_sea_battle__games (id, challenger_id, challenger_name, opponent_id, opponent_name, status, winner_id, winner_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-15 days','+0 minutes'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-13 days','+0 minutes'))",
+   "params": [
+    "perf-game-25",
+    "{{child}}",
+    "Mia",
+    "{{child2}}",
+    "Leo",
+    "complete",
+    "{{child2}}",
+    "Leo"
+   ]
+  }
+ ]
+}
