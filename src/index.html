@@ -270,6 +270,11 @@
     .empty { text-align: center; padding: 48px 20px; color: var(--muted); }
     .empty .icon { font-size: 2.8rem; margin-bottom: 10px; }
     .empty p { font-size: 0.9rem; }
+    .load-error { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--hub-tint-danger, #fee2e2);
+                  color: var(--hub-tint-danger-fg, #b91c1c); font-size: 0.9rem; display: flex; gap: 10px;
+                  align-items: center; justify-content: space-between; }
+    .load-error-retry { background: none; border: 1px solid currentColor; border-radius: 8px; padding: 4px 10px;
+                        color: inherit; font: inherit; cursor: pointer; white-space: nowrap; }
 
     /* ── Back button ── */
     .back { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 0.85rem;
@@ -283,7 +288,7 @@
 </div>
 
 <script type="module">
-import { glyph, chickadee } from "/hub-sdk.js";
+import { glyph, chickadee, hubAlert } from "/hub-sdk.js";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const GRID  = 10;
@@ -321,6 +326,9 @@ let opponentShips = [];
 let myShots       = [];
 let opponentShots = [];
 let view          = 'loading';
+// Set while the first load has not succeeded: home shows a banner with a retry
+// and does not claim there are no games.
+let loadFailed    = false;
 
 // Setup state
 let setupShips   = [];    // placed so far: { type, size, label, horizontal, positions }
@@ -379,14 +387,14 @@ function maybeStartWatching(gameId) {
   if (STREAM_URL && document.visibilityState === 'visible') {
     streamConn = createStreamHelper(STREAM_URL, 'sea-battle.move-fired', async (event) => {
       if (event.payload?.gameId !== gameId) return;
-      await loadGameDetail(gameId);
+      await loadGameDetail(gameId).catch(() => {});
       if (!isWaiting()) stopWatching();
       render();
     });
     streamConn.connect();
   } else {
     pollTimer = setInterval(async () => {
-      await loadGameDetail(gameId);
+      await loadGameDetail(gameId).catch(() => {});
       if (!isWaiting()) stopPolling();
       render();
     }, POLL_MS);
@@ -415,7 +423,9 @@ async function db(sql, params = []) {
     headers: { 'Content-Type':'application/json' },
     body: JSON.stringify({ sql, params }),
   });
-  return res.json();
+  const json = await res.json().catch(() => null);
+  if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "Couldn’t reach the hub. Try again.");
+  return json;
 }
 
 // ── Events ────────────────────────────────────────────────────────────────────
@@ -469,11 +479,12 @@ async function loadMembers() {
     if (!me) me = members[0];
     return;
   }
-  try {
-    const res = await fetch(`${CONTEXT}?keys=family.members`);
-    members = ((await res.json())['family.members']) ?? [];
-    if (!me && members.length) me = members[0];
-  } catch { members = []; }
+  // A failed read is a failed load, never an empty household.
+  const res = await fetch(`${CONTEXT}?keys=family.members`);
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data || typeof data !== 'object' || (Array.isArray(data.$errors) && data.$errors.includes('family.members'))) throw new Error('Couldn’t load members');
+  members = data['family.members'] ?? [];
+  if (!me && members.length) me = members[0];
 }
 
 async function loadGames() {
@@ -534,13 +545,16 @@ async function createGame(opponentId) {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ opponentId }),
-  });
-  if (!res.ok) {
-    console.error('Create game failed:', await res.json().catch(() => ({})));
-    return;
+  }).catch(() => null);
+  if (!res?.ok) {
+    console.error('Create game failed:', await res?.json().catch(() => ({})));
+    const btn = document.getElementById('chal-btn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Challenge'; }
+    hubAlert("Couldn't start the game. Try again.");
+    return false;
   }
   const game = await res.json();
-  await loadGames();
+  await loadGames().catch(() => {});
   closeModal();
   await openGame(game.id);
 }
@@ -555,9 +569,12 @@ async function placeFleet(gameId) {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ gameId, ships: setupShips.map(s => ({ type: s.type, size: s.size, positions: s.positions })) }),
-  });
-  if (!res.ok) {
-    console.error('Place fleet failed:', await res.json().catch(() => ({})));
+  }).catch(() => null);
+  if (!res?.ok) {
+    console.error('Place fleet failed:', await res?.json().catch(() => ({})));
+    // Redrawn with the ships still placed, so Ready can be pressed again.
+    render();
+    hubAlert("Couldn't place your fleet. Try again.");
     return;
   }
   const { new_status, new_turn_id, updated_at } = await res.json();
@@ -586,9 +603,13 @@ async function fireAt(gameId, row, col) {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ gameId, row, col, shotId: uid() }),
-  });
-  if (!res.ok) {
-    console.error('Fire shot failed:', await res.json().catch(() => ({})));
+  }).catch(() => null);
+  if (!res?.ok) {
+    console.error('Fire shot failed:', await res?.json().catch(() => ({})));
+    // The board as the hub has it, redrawn so the cells can be tapped again.
+    await loadGameDetail(gameId).catch(() => {});
+    render();
+    hubAlert("That shot didn't go through. Try again.");
     return;
   }
 
@@ -653,7 +674,12 @@ async function openGame(gameId) {
   selectedType = SHIPS[0].type;
   horizontal   = true;
   hoverCell    = null;
-  await loadGameDetail(gameId);
+  try {
+    await loadGameDetail(gameId);
+  } catch {
+    hubAlert("Couldn't open that game. Try again.");
+    return;
+  }
   view = 'game';
   render();
   maybeStartWatching(gameId);
@@ -706,9 +732,10 @@ window.confirmAbandon = async function(gameId) {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ gameId }),
-  });
-  if (!res.ok) {
-    console.error('Abandon failed:', await res.json().catch(() => ({})));
+  }).catch(() => null);
+  if (!res?.ok) {
+    console.error('Abandon failed:', await res?.json().catch(() => ({})));
+    hubAlert("Couldn't end the game. Try again.");
     return;
   }
   const { abandoned_at, updated_at } = await res.json();
@@ -727,9 +754,10 @@ window.confirmResign = async function(gameId) {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ gameId }),
-  });
-  if (!res.ok) {
-    console.error('Resign failed:', await res.json().catch(() => ({})));
+  }).catch(() => null);
+  if (!res?.ok) {
+    console.error('Resign failed:', await res?.json().catch(() => ({})));
+    hubAlert("Couldn't resign. Try again.");
     return;
   }
   const { winner_id, winner_name, resigned_by_id, updated_at } = await res.json();
@@ -784,7 +812,8 @@ window.submitChallenge = async function() {
   if (!pendingOpponentId) return;
   const btn = document.getElementById('chal-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
-  await createGame(pendingOpponentId);
+  // A refused challenge keeps the chosen opponent, so the button can be tried again.
+  if (await createGame(pendingOpponentId) === false) return;
   pendingOpponentId = null;
 };
 
@@ -984,10 +1013,11 @@ function renderHome() {
       <div><h1>${glyph('anchor')} Sea Battle</h1><div class="sub">Async naval strategy for the family</div></div>
       <button class="btn btn-primary" onclick="openNewGame()">+ New Game</button>
     </div>
+    ${loadFailed ? `<div class="load-error" data-testid="load-error" role="alert"><span>Couldn’t load your games.</span> <button type="button" class="load-error-retry" data-testid="load-retry" onclick="retryLoad()">Try again</button></div>` : ''}
     ${s('Your Turn', myTurn)}
     ${s('Waiting', waiting)}
     ${s('Completed', done.slice(0,10))}
-    ${!games.length ? `<div class="empty"><div class="icon">${chickadee('nest', { size: 72 })}</div><p>No games yet.</p><p style="margin-top:6px">Challenge a family member to start!</p></div>` : ''}
+    ${!games.length && !loadFailed ? `<div class="empty"><div class="icon">${chickadee('nest', { size: 72 })}</div><p>No games yet.</p><p style="margin-top:6px">Challenge a family member to start!</p></div>` : ''}
   </div>`;
 }
 
@@ -1237,7 +1267,11 @@ window.submitFleet = async function() {
 
 window.refreshGame = async function() {
   if (!currentGame) return;
-  await loadGameDetail(currentGame.id);
+  try {
+    await loadGameDetail(currentGame.id);
+  } catch {
+    hubAlert("Couldn't refresh the game. Try again.");
+  }
   render();
 };
 
@@ -1257,7 +1291,7 @@ document.addEventListener('visibilitychange', () => {
     stopStream();
     if (isWaiting()) {
       pollTimer = setInterval(async () => {
-        await loadGameDetail(gameId);
+        await loadGameDetail(gameId).catch(() => {});
         if (!isWaiting()) stopPolling();
         render();
       }, POLL_MS);
@@ -1276,13 +1310,24 @@ function handleDeepLink() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-(async () => {
+const load = (async () => {
   await loadMembers();
   await loadGames();
+  loadFailed = false;
   view = 'home';
   handleDeepLink();
   if (view === 'home') render();
-})();
+});
+// A failed read still draws the home screen, under the banner.
+function start() {
+  return load().catch(() => {
+    loadFailed = true;
+    view = 'home';
+    render();
+  });
+}
+window.retryLoad = start;
+start();
 </script>
 </body>
 </html>
