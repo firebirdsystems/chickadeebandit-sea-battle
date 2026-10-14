@@ -70,3 +70,30 @@ export function isAllSunk(ships, shots) {
     return positions.every(p => hits.has(`${p.row},${p.col}`));
   });
 }
+
+// ── Failure wording ──────────────────────────────────────────────────────────
+// "Try again" only where trying again can work; never the hub's own text.
+
+/** The line for a failed write, from the error's `status` / `code`. */
+export function failureLine(e, { action, thing } = {}) {
+  if (e?.forUser) return e.message;
+  if (e?.code === 'UNIQUE_CONSTRAINT' || /UNIQUE constraint failed/i.test(String(e?.message ?? ''))) return `That ${thing} already exists.`;
+  if (e?.status === 403) return `You don’t have permission to ${action}.`;
+  if (e?.status === 507) return 'The household’s storage is full — free up space first.';
+  if (e?.status === 404) return `This ${thing} has been removed.`;
+  if (e?.status === 409) return `This ${thing} was changed by someone else — check it first.`;
+  if (e?.status === 429) return 'Too many tries — wait a minute and try again.';
+  return `Couldn’t ${action} — try again.`;
+}
+
+/**
+ * The line for a refused challenge (POST api/game/create). Its 404 means the
+ * chosen opponent is not a household member any more, and a 409
+ * `game_id_taken` means the page's minted game id belongs to another game:
+ * the page mints a fresh one, so trying again can work.
+ */
+export function challengeFailureLine(e) {
+  if (e?.status === 409 && e?.code === 'game_id_taken') return 'Couldn’t start the game — try again.';
+  if (e?.status === 404) return 'That family member isn’t in the household any more.';
+  return failureLine(e, { action: 'start the game', thing: 'game' });
+}

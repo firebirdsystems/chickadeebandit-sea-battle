@@ -289,6 +289,7 @@
 
 <script type="module">
 import { glyph, chickadee, hubAlert } from "/hub-sdk.js";
+import { challengeFailureLine } from "./logic.js";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const GRID  = 10;
@@ -340,6 +341,9 @@ let revealOpp   = false;
 // Modal
 let modalEl = null;
 let pendingOpponentId = null;
+// The game id each challenge in the open New Game dialog sends, by opponent id:
+// kept across retries, dropped on success and when the dialog is opened afresh.
+let challengeGameIds = {};
 
 // Watching (SSE when tab visible, polling fallback when hidden)
 let pollTimer  = null;
@@ -540,20 +544,30 @@ async function createGame(opponentId) {
   // Game rows are endpoint_writes_only — creation goes through the trusted
   // api/game/create endpoint so challenger identity can't be forged and the
   // game's lifecycle/result columns can't be written directly via api/db.
+  // The game's id is minted once per challenge to this opponent and sent on
+  // every try: a retry after a lost answer gets back the game the first try
+  // stored (the hub answers it again, with no second alert) instead of a second
+  // game. A hub that ignores it answers its own id, which is the one used below.
+  const gameId = challengeGameIds[opponentId] ??= uid();
   const res = await fetch(CREATE_URL, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ opponentId }),
+    body: JSON.stringify({ opponentId, gameId }),
   }).catch(() => null);
   if (!res?.ok) {
-    console.error('Create game failed:', await res?.json().catch(() => ({})));
+    const body = await res?.json().catch(() => ({}));
+    console.error('Create game failed:', res?.status, body);
+    const e = Object.assign(new Error('Create game failed'), { status: res?.status, code: body?.code });
+    // The id belongs to another game: the next try needs a new one.
+    if (e.status === 409 && e.code === 'game_id_taken') delete challengeGameIds[opponentId];
     const btn = document.getElementById('chal-btn');
     if (btn) { btn.disabled = false; btn.textContent = 'Challenge'; }
-    hubAlert("Couldn't start the game. Try again.");
+    hubAlert(challengeFailureLine(e));
     return false;
   }
   const game = await res.json();
+  challengeGameIds = {};
   await loadGames().catch(() => {});
   closeModal();
   await openGame(game.id);
@@ -785,6 +799,7 @@ function openNewGame() {
     return;
   }
   pendingOpponentId = null;
+  challengeGameIds = {};
   const items = opts.map(m => `
     <div class="member-item" id="mi-${esc(m.id)}" onclick="selectOpp('${esc(m.id)}')">
       <div class="avatar" style="background:${memberColor(m.id)}">${initial(m.name)}</div>
